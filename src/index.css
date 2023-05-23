@@ -13,14 +13,30 @@ body {
   font-family:'Times New Roman', Times, serif;
   font-size:20px;
   color:darkgray;
+  background-image:url("https://media.giphy.com/media/ovWn8N8TVg8hi/giphy.gif");
+  background-repeat:no-repeat;
+  background-size:cover;
+  width:80%;
+  margin-left:10%;
 }
 .header-title h1{
   text-shadow: 1px 1px black;
+  color:darkred;
+  font-size: 60px;
+  padding:10px;
+  margin-top:0px;
+}
+.title_tree{
+  color:green;
+}
+
+a:visited{
+  color:inherit;
 }
 
 .container{
   display:grid;
-  grid-template-columns: 30% 70%;
+  grid-template-columns: 100%;
 }
 
 .side{
@@ -31,10 +47,24 @@ body {
   text-align: center;
 }
 
+#top-anime-container{
+  display:grid;
+  grid-template-columns: 90%;
+  width:80%;
+  margin-left:20%;
+  justify-content: center;
+}
+
 @media (min-width: 999px){
   .anime-list{
     display:grid;
     grid-template-columns: repeat(3, 1fr);
+  }
+  #top-anime-container{
+    display:grid;
+    grid-template-columns: repeat(3, 30%);
+    width:90%;
+    margin-left:10%;
   }
 }
 
@@ -42,6 +72,12 @@ body {
   .anime-list{
     display:grid;
     grid-template-columns: repeat(2, 1fr);
+  }
+  #top-anime-container{
+    display:grid;
+    grid-template-columns: 45% 45%;
+    width:90%;
+    margin-left:10%;
   }
 }
 
@@ -51,6 +87,7 @@ body {
 
 h2{
   font-size: 30px;
+  color: white;
 }
 
 button{
@@ -74,8 +111,24 @@ button:hover{
   margin-bottom: 10px;
 }
 
+.topAnimePic-container{
+  height:321px;
+  width:227px;
+  background-color: red;
+}
+
+.topAnimePic{
+  cursor:pointer;
+}
+
 .add-btn{
   width:auto;
+  display:inline-block;
+  margin:0px auto 0px auto;
+}
+
+#info-box-test{
+  
 }
 
 :root{
@@ -128,10 +181,17 @@ button:hover{
   text-align: center;
 }
 
+#search_dropdown_cont{
+  width:20%;
+  position:absolute;
+  background-color: white;
+  margin-left:105px;
+}
+
 .episodeCount-btn{
   background-color: inherit;
   width:auto;
-  padding:0px 4% 0px 0px;
+  padding:0px 1% 0px 0px;
   font-size:16px;
   color:green;
   text-decoration: underline;
@@ -188,10 +248,45 @@ button:hover{
   height:auto;
 }
 
+.anime-Stuff-test{
+  margin-bottom: 100px;
+  height:auto;
+}
+
 .anime-title{
   margin:0px;
   color:white;
   font-weight: bold;
+}
+
+.anime-title-top{
+  position:relative;
+  bottom:50px;
+  margin:0px 0px 0px 2px;
+  font-weight: bold;
+  font-size:15px;
+  display:none;
+}
+
+.selectedTitle2{
+  background-color: yellow;
+  display:block;
+  border-radius: 10px;
+  color:black;
+}
+.selectedTitle2:hover{
+  color: orange;
+}
+
+.anime-title-test{
+  margin:0px auto 0px auto;
+  color:white;
+  font-weight: bold;
+  text-align: center;
+  width:300px;
+  font-size:20px;
+  height:70px;
+  vertical-align: center;
 }
 
 /*-------------------------------*/
@@ -201,18 +296,87 @@ button:hover{
 }
 
 .filter_container{
+  display:flex;
   text-align: right;
+  width:80%;
+  padding:2% 0% 2% 0%;
+  margin:0% auto 0% auto;/*top was 2%*/
+}
+
+#toBottom{
+  top:1%;
+  position:fixed;
+  color:red;
+}
+
+#toTop{
+  bottom:1%;
+  position:fixed;
+  color:red;
+}
+
+#queue_search_id{
+  text-align: center;
+  width:50%;
+  /*background-color: pink;*/
+}
+
+#queue_filter_id{
+  display:inline-block;
+  text-align: center;
+  width:50%;
+  /*background-color: green;*/
+}
+
+#input_queue{
+  width:50%;
+}
+
+.queue_search_label{
+  color:white;
+  margin-right:1%;
+}
+
+#queue_search_btn{
+  width:auto;
+  margin:0% 2% 0% 0%;
+  padding:1%;
+  border-radius: 0%;
+  color:white;
 }
 
 .filter_label{
   color:lavender;
+  margin-right: 1%;
 }
 
 .filter{
-  width:30%;
-  margin: 0px 10% 0px 0%;
+  width:50%;
+  margin: 0% 0% 0px 0%;
 }
 
+/*Status For replacing filter stuff*/
+.Anime_Statuses{
+  width:80%;
+  margin-left:10%;
+  margin-bottom:2%;
+  text-align: center;
+}
+
+
+.QueueOptionBtns{
+  background-color: white;
+  color:black;
+  width:auto;
+  width:19%;
+  text-align: center;
+  padding:10px;
+}
+.QueueOptionBtns:nth-child(1), :nth-child(2){
+  margin-right:1%;
+}
+
+/*Queue Table holding the materials*/
 .table-container{
   margin:0px auto 0px auto;
   width:80%;
@@ -220,7 +384,7 @@ button:hover{
 
 .main_table{
   width:100%;
-  margin:40px auto 0px auto;
+  margin:0px auto 0px auto;/*top was 40px*/
   border-collapse: collapse;
 }
 
@@ -236,7 +400,55 @@ button:hover{
 
 .main_table tr{
   width:100%;
-  border: 2px solid gray;
+  border: 5px solid gray; /*was 2px*/
+}
+
+.Data_table_row{
+  width:100%;
+}
+
+.Data_table_row td{
+}
+
+#Main_Queue_Option{
+  width:100%;
+  display:inline-flex;
+}
+
+#Main_Queue_Option > div{
+  margin:1px 2% 3px 2%;
+}
+
+#PE{
+  width:18%;
+}
+
+#PO{
+  width:18%
+}
+
+#ATC{
+  width:18%
+}
+
+#Ep_button_option{
+  display:inline-flex;
+  width:10%;
+}
+
+#buttonUp{
+  width:50%;
+}
+#buttonDown{
+  width:50%;
+}
+
+#PE button,#PO button,#ATC button{
+  text-align: center;
+  background-color: white;
+  padding:1px;
+  margin:0px;
+  border-radius: 0;
 }
 
 .img_header, .name_header, .type_header,
@@ -258,7 +470,7 @@ button:hover{
 
 .name_header{
   width:35%;/*was auto*/
-  text-align: left;
+  text-align: center;
   padding:7px;
 }
 
@@ -300,7 +512,7 @@ button:hover{
   text-align: center;
 }
 /*For Queue contents match the size with header thankssss*/
-.queue-container{
+#queue-container{
   text-align: left;
   width: 100%
 }
@@ -318,31 +530,48 @@ button:hover{
 .queue_img{
   width:10%;
   height:100px;
-  padding:5px 5px 5px 0px;
+  /*padding:5px 5px 5px 0px;*/
+  padding:1px 0.5% 1px 0.5%;
 }
 .queue_img img{
   width:100%;
 }
 
 .queue_name_synopsis{
-  display:inline-block;
-  width:99%;
-  padding:1% 0px 0px 1%;
+  /*display:inline-block;*/
+  /*width:min-content;*/
+  width:10%; /*was auto*/
+  padding:0% 0px 0px 0%;
 }
 
 .queue_name_synopsis h3, a{
+  text-align: center;
   text-decoration: none;
   padding:0px;
   margin:0px;
   color: rgba(27, 146, 179, 1);
 }
 
-a:visited{
-  color:inherit;
+.selectedTitle:visited{
+  color: rgba(27, 146, 179, 1);
+}
+.selectedTitle:hover{
+  color:aqua;
+}
+
+.Inc_Dec_Span{
+  display:inline;
+}
+
+.epButtons{
+  font-size:19px;
+  padding:0px 4px 0px 4px;
+  width: 100%;
+  text-align: center;
 }
 
 .score{
-  width: 7%;
+  width: 3%;
   text-align: center;
 }
 .score-btn{
@@ -373,7 +602,7 @@ a:visited{
 
 .delete{
   text-align: center;
-  width:max-content;
+  width:10%;
 }
 
 .dlt_button{
@@ -383,6 +612,11 @@ a:visited{
 
 .prgs_anime{
   text-align: center;
+  width:20%;
+}
+
+#bottom{
+  margin:25px 0px 25px 0px;
 }
 
 a:hover{
@@ -431,6 +665,11 @@ code {
 }
 #amount{
   width:6%;
+  font-weight: bolder;
+}
+#amount > option{
+  background-color: white;
+  font-weight: bolder;
 }
 
 span#header_seasonal_result{
@@ -450,4 +689,264 @@ span#header_seasonal_result{
 
 #submission:hover{
   background-color:white;
+}
+
+/*ABOUT PAGE STUFF*/
+.NoAbout{
+  font-size:100px;
+  text-align: center;
+  margin:5% auto 50% auto;
+  color: white;
+}
+
+.aboutMeTitle{
+  text-shadow: 10px 10px 10px orange;
+  text-align: center;
+  color:white;
+  margin:20px 10% 20px 10%;
+}
+
+.aboutMePars{
+  text-align:center;
+  font-size: 17px;
+  color:white;
+  font-weight: bolder;
+  margin:10px 10% 20px 10%;
+}
+
+.updatesListHeader{
+  margin:20px 10% 0px 10%;
+  color: white;
+}
+
+.updatesList{
+  color:white;
+  margin:10px 10% 20px 10%;
+}
+
+.updatesList > li{
+  font-size:20px;
+}
+
+/*Modal content--------------Start Here-----------------> Start*/
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #202020;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modalCloseBtn{
+  width:auto;
+  padding:2px;
+}
+
+.Modal{
+  position: 'absolute';
+  transform: 'translate(-50%, -50%)';
+  top: '40px';
+  left: '40px';
+  right: '40px';
+  bottom: '40px';
+  border: '1px solid #ccc';
+  background: '#fff';
+  overflow: 'auto';
+  -webkit-overflow-scrolling: 'touch';
+  border-radius: '4px';
+  outline: 'none';
+  padding: '20px';
+  background-image:"url(https://t3.ftcdn.net/jpg/03/08/13/12/360_F_308131267_unLRF2JmPsjjXgrMRaFA3aEnrKa9aUxK.jpg)";
+}
+
+.Overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rebeccapurple;
+}
+
+/*Everything below will involve the account pages*/
+#accButtonContainer{
+  display:flex;
+  width:80%;
+  margin-left:10%;
+  margin-top:10px;
+  justify-content: right;
+}
+
+.accButtons{
+  width:auto;
+  margin:0px 0px 20px 0px;
+  height:auto;
+}
+.accButtons:nth-child(1){
+  margin-right:1%;
+}
+
+.user_img{
+  margin:0px;
+}
+
+#reg_form_container{
+  position: absolute;
+  width:80%;
+  margin-left:10%;
+  height:100%;
+}
+#register_form{
+  background-color: white;  
+  width:60%;
+  text-align: center;
+  margin:10% auto 0px auto;
+  border:5px solid gray;
+  border-radius: 5px;
+  background-image: url("https://media.giphy.com/media/Mj0gk1wnekXC0/giphy.gif");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+#inner_container{
+  /*Empty*/
+}
+
+#register_legend{
+  color:orange;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+#register_form label{
+  font-size:20px;
+  font-weight:bold;
+  color:white;
+}
+
+#register_form input{
+  width:70%;
+  border-radius: 5px;
+  font-size: 20px;
+}
+
+#register_submit_btn{
+  width: auto;
+  margin-bottom: 5px;
+}
+
+#register_link{
+  font-weight: bold;
+  cursor:pointer;
+}
+
+.register_final{
+  color:orange;
+}
+
+/*The stuff*/
+.user_name_header{
+  color:white;
+  margin-bottom:0px;
+}
+.userName{
+  color:orange;
+  font-weight: bolder;
+  cursor:pointer;
+  margin:0px;
+}
+
+.common_opt:nth-child(even){
+  display:block;
+  background-color: black;
+  border-style: none solid none solid;
+  border-color: white;
+  border-width: 1px;
+  padding:10px 0px 10px 0px;
+}
+
+.common_opt:nth-child(odd){
+  display:block;
+  background-color: black;
+  border:1px solid white;
+  padding:10px 0px 10px 0px;
+}
+
+.common_opt:nth-child(1){
+  border-radius: 10px 10px 0px 0px;
+}
+
+.common_opt:nth-child(3){
+  border-radius: 0px 0px 10px 10px;
+}
+
+.common_opt:hover{
+  background-color: green;
+}
+
+.inner_opt{
+  color:white;
+  font-weight: bolder;
+  padding:5px 0px 5px 0px;
+}
+
+.dropdown{
+  position: absolute;
+  width:50%;
+  margin-left:50%;
+}
+#user_dropdown{
+  background-color: inherit;
+  color:red;
+  border:none;
+}
+
+option{
+  background-color: white;
+  height:2px;
+  width:100px;
+}
+
+/*Holiday specials here*/
+#fools{
+  font-size:150px;
+  font-weight: bolder;
+  color:blue;
+  position: sticky;
+  bottom: 30%;
+  margin:0px auto 0px auto;
+  background-color: orange;
+  opacity:0.8;
+  text-align: center;
+  width: 100%;
 }

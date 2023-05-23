@@ -1,0 +1,53 @@
+import React, { useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import {useState} from 'react';
+
+const openLink = () =>{
+  window.open("https://www.youtube.com/watch?v=Lz-BCw-tPdE", '_blank');
+}
+
+//legacy in onChange -> props.setSearch(()=>e.target.value)
+
+const Nav = (props) => {
+  const [page, setPage] = useState(false);
+
+  const loadSearchResults = async(e) =>{
+    /*let fileContents = fetch("/src/comp/AnimeListUpdated.json", {
+      mode:"cors",
+      method:"GET"})
+    .then((value)=>{
+      console.log(value);
+    });http://localhost:3000/
+    if(e.target.value != ""){
+      //let newElement = document.createElement("span");
+      //console.log(fileContents);
+    }*/
+    props.setSearch(()=>e.target.value)
+  }
+
+  return (
+    <div className='nav-container'>
+    <nav className='ViewQueue'>
+        <div className='left'>
+          <Link className="Link" to="/"><button>Home</button></Link>
+          <Link className="Link" to="/queue"><button>The Queue</button></Link>
+          <Link className="Link" to="/seasonal"><button>Seasonal Anime</button></Link>
+          <Link className="Link" to="/stats"><button onClick={(e)=>openLink(e)}>Stats</button></Link>
+          <Link className="Link" to="/about"><button>About</button></Link>
+
+          {(props.showSearch === true) && (<form className='search-box' onSubmit={props.handleSearch}>
+            <input 
+            onChange={e=>loadSearchResults(e)}
+            type="search" 
+            placeholder='Search for anime...'/> 
+            <div id="search_dropdown_cont">
+                
+            </div>  
+          </form>)}
+        </div>
+      </nav>
+      </div>
+  )
+}
+
+export default Nav

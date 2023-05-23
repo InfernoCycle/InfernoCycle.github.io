@@ -1,0 +1,17 @@
+import React from 'react'
+import Nav from './Nav'
+import Header from './Header'
+
+export default function Stats(props){
+
+
+  return (
+    <div>
+      <Header loggedIn={props.loggedIn} setloggedIn={props.setloggedIn}/>
+      <Nav/>
+      <a className="NoAbout" href="https://www.youtube.com/watch?v=Raiz5MAb98Q" target="_blank">
+        <img style={{"marginTop":"30px"}} src="https://www.lovethispic.com/uploaded_images/248715-April-Fools-Day-Some-People-Take-It-Too-Far.jpg" width="100%"/>
+      </a>
+    </div>
+  )
+}

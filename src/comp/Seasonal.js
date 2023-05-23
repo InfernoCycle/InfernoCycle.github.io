@@ -23,6 +23,56 @@ export default function Seasonal(props) {
     const [Year, updateYear] = useState(new Date().getFullYear());
     const [results, updateResults] = useState(10);
 
+    const [SeasonLabel, updateLabel] = useState(`Fall ${Year}`);
+
+    const [winter, setWinter] = useState(false); 
+    const [summer, setSummer] = useState(false);
+    const [spring, setSpring] = useState(false); 
+    const [fall, setFall] = useState(false);
+
+    useEffect(()=>{
+        if((new Date().getMonth() >= 11 && new Date().getMonth <=2)){
+            console.log("it's winter")
+            updateseason((obj)=>{
+                setWinter(true);
+                //fall = false;
+                //summer = false;
+                //spring = false;
+                return "Winter";
+            })
+        }
+        if((new Date().getMonth() >= 2 && new Date().getMonth() <= 5)){
+            console.log("it's spring")
+            updateseason((obj)=>{
+                setSpring(true);
+                //fall = false;
+                //summer = false;
+                //winter = false;
+                return "Spring";
+            })
+        }
+        if((new Date().getMonth() >= 6 && new Date().getMonth() <= 8)){
+            console.log("it's summer")
+            updateseason((obj)=>{
+                setSummer(true);
+                //fall = false;
+                //spring = false;
+                //winter = false;
+                return "Summer"
+            })
+        }
+        if((new Date().getMonth() >= 9 && new Date().getMonth() <= 11)){
+            console.log("it's fall")
+            updateseason((obj)=>{
+                setFall(true);
+                //summer = false;
+                //spring = false;
+                //winter = false;
+                return "Fall"
+            })
+        }
+    }, [])
+
     const getSeason = (e) =>{
         //console.log(e.target.value);
         updateseason(e.target.value);
@@ -46,15 +96,21 @@ export default function Seasonal(props) {
     } 
 
     const changeSeason = async(e) =>{
-        console.log("changing season")
+        alert("Please wait at most 10 seconds for content to load");
+        //console.log("changing season")
         const res1 = await fetch(`https://infernovertigo.pythonanywhere.com/anime/season/val=${Season.toLowerCase() + "_" + Year.toString().toLowerCase()}/limit=${results}`)
         .then((res)=>res.json())
 
-        console.log(res1)
-        updateSeason([...res1]);
+        //console.log(res1)
+        props.updateSeason([...res1]);
+        updateLabel(()=>`${Season} ${Year}`);
     }
 
     useEffect(()=>{
+        //console.log("this ran stuff")
+    }, [changeSeason])
+
+    /*useEffect(()=>{
         async function aFunc(){
             const res1 = await fetch(`https://infernovertigo.pythonanywhere.com/anime/season/val=latest/limit=${results}`)
             .then((res)=>res.json())
@@ -64,21 +120,21 @@ export default function Seasonal(props) {
         }
         aFunc();
         console.log("This run")
-    }, [])
+    }, [])*/
   
     return (
     <div>
-        <Header/>
+        <Header loggedIn={props.loggedIn} setloggedIn={props.setloggedIn}/>
         <Nav/>
         <div className="amount_form_container">
             
             <span id="seasons_window">
                 <label className="seasonal_text" htmlFor="season">Season: </label>
                 <select onChange={(e)=>getSeason(e)} name="selector" id="season">
-                    <option>Fall</option>
-                    <option>Winter</option>
-                    <option>Spring</option>
-                    <option>Summer</option>
+                    <option selected={fall}>Fall</option>
+                    <option selected={winter}>Winter</option>
+                    <option selected={spring}>Spring</option>
+                    <option selected={summer}>Summer</option>
                 </select>
             </span>
 
@@ -113,12 +169,13 @@ export default function Seasonal(props) {
         <div className='mainContent'>
               <h2>{Season} {Year}:</h2>
               <div className='anime-list'>
-               {seasonAnime.map((obj)=>{
+               {props.seasonAnime.map((obj)=>{
                  try{
                   return(
-                  <div key={obj.mal_id} className='anime-Stuff'>
+                  <div key={obj.mal_id} className='anime-Stuff-test'>
+                    <p className="anime-title-test"><a className="selectedTitle" href={obj.url} target="_blank">{obj.title}</a></p>
                     <img src={obj.image_url} alt="Anime-pic" width="227" height="321px"/>
-                    <p className="anime-title">{obj.title}</p><Add key={obj.mal_id} status={props.status} 
+                    <Add key={obj.mal_id} status={props.status} 
                     img_url={obj.image_url} title={obj.title} id={obj.mal_id} addState={props.addState}
                     url={obj.url} episodes={obj.episodes} synopsis={obj.synopsis} airing={obj.airing}
                     type={obj.type} members={obj.members} start_date={obj.start_date} end_date={obj.end_date}

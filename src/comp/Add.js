@@ -36,7 +36,8 @@ const Add = (props) => {
       props.addState(props.id, true, props.title, props.img_url, 
         props.url, props.episodes, props.avgScores, props.type,
         props.synopsis, props.airing, props.start_date, props.end_date, 
-        props.members, props.rated, props.japanese_name, props.english_name, null, props)
+        props.members, props.rated, props.japanese_name, props.english_name, null, props,
+        props.broadcast)
     }else{
       setStatus(false);
       setText("Add");
@@ -44,7 +45,8 @@ const Add = (props) => {
       props.addState(props.id, false, props.title, props.img_url, 
         props.url, props.episodes, props.avgScores, props.type,
         props.synopsis, props.airing, props.start_date, props.end_date, 
-        props.members, props.rated, props.japanese_name, props.english_name, null, props)
+        props.members, props.rated, props.japanese_name, props.english_name, null, props,
+        props.broadcast)
     }
     //props.addState(buttonObj, props.id, status), " print from Add.js";
   }
@@ -70,7 +72,8 @@ const Add = (props) => {
       props.addState(id, status, props.title, props.img_url, 
         props.url, props.episodes, props.avgScores, props.type,
         props.synopsis, props.airing, props.start_date, props.end_date, 
-        props.members, props.rated, props.japanese_name, props.english_name, null, props);
+        props.members, props.rated, props.japanese_name, props.english_name, null, props,
+        props.broadcast);
       return;
     }
   }
@@ -80,7 +83,11 @@ const Add = (props) => {
   }, [])
 
   return (
-    <button onClick={(e)=>intermediary(e)} className="add-btn">{text}</button>
+    <>
+      <div id="info-box-test">
+        <button onClick={(e)=>intermediary(e)} className="add-btn">{text}</button>
+      </div>
+    </>
   )
 }
 

@@ -12,7 +12,8 @@ const Nav = (props) => {
           <Link className="Link" to="/"><button>Home</button></Link>
           <Link className="Link" to="/queue"><button>The Queue</button></Link>
           <Link className="Link" to="/seasonal"><button>Seasonal Anime</button></Link>
-          <Link className="Link" to="/queue"><button>About</button></Link>
+          <Link className="Link" to="/stats"><button>Stats</button></Link>
+          <Link className="Link" to="/about"><button>About</button></Link>
 
           {(props.showSearch === true) && (<form className='search-box' onSubmit={props.handleSearch}>
             <input 

@@ -4,71 +4,36 @@ import Nav from './Nav'
 import { useEffect, useState} from 'react'
 import QueueHolder from './QueueHolder'
 import {FaFilter} from "react-icons/fa"
+import Modal from "react-modal";
+import { Link } from 'react-router-dom'
+import QueueToFile from '../ProcessingFrontEnd/queueToFile'
+import CopyQueue from './CopyQueue'
+import ExportQueue from './ExportQueue'
 
-const quickSort = (list, low, high, order) =>{
-  if(low < high){
-    var pi = partition(list, low, high, order);
-    quickSort(list, low, pi-1);
-    quickSort(list, pi+1, high);
-  }
-}
-
-function partition(list, low, high, order){
-  let pivot = list[high];
-
-  var i = (low - 1);
-  for(let k = low; k <= high-1; k++){
-      if(list[k].name < pivot.name){
-        i++;
-        list = swap(list, i, k);
-      }
-  }
-  list = swap(list, i+1, high);
-  return (i + 1);
-}
-
-function swap (list, f, k) {
-  let temp = list[f];
-  list[f] = list[k];
-  list[k] = temp;
-
-  return list;
-}
-
-//desc----------------------------------------------------------
-const quickSort2 = (list, low, high, order) =>{
-  if(low < high){
-    var pi = partition2(list, low, high, order);
-    quickSort2(list, low, pi-1);
-    quickSort2(list, pi+1, high);
-  }
-}
-
-function partition2(list, low, high, order){
-  let pivot = list[high];
-
-  var i = (low - 1);
-  for(let k = low; k <= high-1; k++){
-      if(list[k].name > pivot.name){
-        i++;
-        list = swap2(list, i, k);
-      }
-  }
-  list = swap2(list, i+1, high);
-  return (i + 1);
-}
-
-function swap2 (list, f, k) {
-  let temp = list[f];
-  list[f] = list[k];
-  list[k] = temp;
-
-  return list;
-}
 const Timeout = (time) => {
   let controller = new AbortController();
   setTimeout(() => controller.abort(), time * 1000);
   return controller;
+};
+
+// Make sure to bind modal to your appElement (https://reactcommunity.org/react-modal/accessibility/)
+const customStyles = {
+    content: {
+      top: '50%',
+      left: '50%',
+      right: 'auto',
+      bottom: 'auto',
+      marginRight: '-50%',
+      transform: 'translate(-50%, -50%)',
+      width: '50%',
+      backgroundColor: "black",
+      backgroundImage:"url(https://t3.ftcdn.net/jpg/03/08/13/12/360_F_308131267_unLRF2JmPsjjXgrMRaFA3aEnrKa9aUxK.jpg)"
+    },
+    overlay:{
+      backgroundColor: 'rgba(0, 0, 255, 0.03)',
+      position:'fixed',
+      //backgroundImage:"url(https://t3.ftcdn.net/jpg/03/08/13/12/360_F_308131267_unLRF2JmPsjjXgrMRaFA3aEnrKa9aUxK.jpg)"
+    }
 };
 
 //OPERATION MOVE MY JUNK 
@@ -76,6 +41,51 @@ const Queue = (props) => {
   const [inQueue, setinQueue] = useState([]);
   const [unchange, setUnchange] = useState([]);
   const [originalQueue, setOriginal] = useState([]);
+  const [inSearch, updateinSearch] = useState("");
+  const [anchored, setAnchored] = useState("A");
+  const [isOpening, setIsOpening] = useState(false);
+  const [url, loadURL] = useState([]);
+
+  let el;
+  let subtitle;
+  const [modalIsOpen, setIsOpen] = React.useState(false);
+
+  function openModal(opening, id) {
+    let ObjectJson = localStorage.getItem(id);
+    let title = JSON.parse(ObjectJson)["title"]
+    let date = JSON.parse(ObjectJson)["start_date"]
+    let year = date.toString().split(",")[1].trim();
+    if(opening){
+      async function retaliate(){
+        const res = await fetch(`https://infernovertigo.pythonanywhere.com/anime/music/val=${title}/opening=${opening}/year=${year}`)
+        .then((response)=>response.json());
+
+        loadURL((obj)=>res);
+      }
+      retaliate();
+      setIsOpening(true);
+    }
+    else{
+      async function retaliate(){
+        const res = await fetch(`https://infernovertigo.pythonanywhere.com/anime/music/val=${title}/opening=${opening}/year=${year}`)
+        .then((response)=>response.json());
+
+        loadURL((obj)=>res);
+      }
+      retaliate();
+      setIsOpening(false);
+    }
+    setIsOpen(true);
+  }
+
+  function afterOpenModal() {
+    // references are now sync'd and can be accessed.
+    //subtitle.style.color = '#f00';
+  }
+
+  function closeModal() {
+    setIsOpen(false);
+  }
 
   const getAnime = async(id)=>{
     /*const res1 = await fetch("http://127.0.0.1:8000/anime/status=true/", {
@@ -85,28 +95,45 @@ const Queue = (props) => {
     let res1 = []
     
     for(var index = 0; index < localStorage.length; index++){
-      var obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
-      //console.log(obj)
-      if(obj.status === true){
-        res1.push(obj);
+      var obj = null
+      if(localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user"){
+        continue;
+      }else{
+        obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
+        //console.log(obj)
+        if(obj.status === true){
+          res1.push(obj);
+        }
       }
     }
     //console.log(res1);
     setinQueue([...res1]);
     setUnchange([...res1]);
     setOriginal([...res1]);
+    props.setInQueue([...res1]);
   }
 
+  //ordering credit to these people: "https://www.scaler.com/topics/javascript-sort-an-array-of-objects/"
+  //ordering credit also to "https://stackoverflow.com/questions/979256/sorting-an-array-of-objects-by-property-values"
   const orderAsc = () =>{
     var temp = inQueue;
-    quickSort(temp, 0, temp.length-1, "asc");
-    setinQueue(()=>[...temp]);
+    var stuff = temp.sort((a, b)=>
+      (a.title > b.title) ? 1 : (a.title < b.title) ? -1 : 0
+    );
+    var nameOnly = temp.map((obj)=>obj.title);
+    //quickSort(nameOnly, 0, temp.length-1, "asc");
+    //setinQueue(()=>[...temp]);
+    setinQueue(()=>[...stuff])
   }
 
   const orderDsc = () =>{
     var temp = inQueue;
-    quickSort2(temp, 0, temp.length-1, "desc");
-    setinQueue(()=>[...temp]);
+    var stuff = temp.sort((a, b)=>
+      (a.title < b.title) ? 1 : (a.title > b.title) ? -1 : 0
+    );
+    //quickSort2(temp, 0, temp.length-1, "desc");
+    //setinQueue(()=>[...temp]);
+    setinQueue(()=>[...stuff])
   }
 
   const original = async() =>{
@@ -118,25 +145,27 @@ const Queue = (props) => {
     setinQueue(()=>originalQueue);
   }
 
-  const main = (e) =>{
-    const data = e.target.value;
+  const main = (option) =>{
+    //const data = e.target.value;
+    //console.log(option)
 
-    if(data === ""){
+    if(option === ""){
       //setinQueue(()=>[...unchange]);
+      console.log("original ran")
       original();
     }
 
-    if(data === "Ascending"){
+    if(option === "Ascending"){
       //console.log("Ascending");
       orderAsc();
       return;
     }
-    if(data === "Descending"){
+    if(option === "Descending"){
       //console.log("Descending");
       orderDsc();
       return;
     }
-    if(data === "Current"){
+    if(option === "Watching Now"){
       //console.log("Current");
       orderCurWtch();
       return;
@@ -177,7 +206,7 @@ const Queue = (props) => {
 
     const data = resOut*/
     const data = JSON.parse(localStorage.getItem(id));
-    console.log(data);
+    //console.log(data);
     
     /*if(data[0].watching === "" || data[0].watching === false){*/
     if(data.watching === "" || data.watching === false){
@@ -241,34 +270,73 @@ const Queue = (props) => {
         return;
     }
 
-    console.log("doubleClicked");
+    //console.log("doubleClicked");
+  }
+
+  const getSearchValue = (e) =>{
+    const val = inQueue.find((obj)=>obj.title === e.target.value)
+    if(val !== undefined){
+      updateinSearch(()=>val.id);
+    }
   }
 
   //<div className='queue-container'>
   //</div>
   return (
-    <div>
+    <div>     
       <div id="top"></div>
-        <Header/>
-        <Nav showSearch={false}/>
-        <a href="#bottom">Scroll to bottom</a>
-        <form className='filter_container'>
-          {/*<label className="queue_search_label">Search:</label>
-          <input list="queue_search" name="search" id="input_queue"></input>
-          <datalist id="queue_search">
-            {inQueue.map((obj)=>{
-              return(<><option key={obj.id} id={obj.id} value={obj.name}/></>)
-            })}
-          </datalist>*/}
+      <Modal
+        isOpen={modalIsOpen}
+        onAfterOpen={afterOpenModal}
+        onRequestClose={closeModal}
+        style={customStyles}
+        contentLabel="Example Modal"
+        appElement={el}
+        animationType="fade"
+        //className="Modal"
+        //overlayClassName="Overlay"
+      >
+        
+        {isOpening ? 
+        <iframe width="100%" height="500" src={url} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe> : 
+        <iframe width="100%" height="500" src={url} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+        }
+      </Modal>
 
-          <label className="filter_label" name="filter"><FaFilter/>Filter:</label>
-          <select className="filter" onChange={(e)=>main(e)}>
-            <option></option>
-            <option>Ascending</option>
-            <option>Descending</option>
-            <option>Current</option>
-          </select>
-        </form>
+        <Header loggedIn={props.loggedIn} setloggedIn={props.setloggedIn}/>
+        <Nav showSearch={false}/>
+        <a id="toBottom" href="#bottom">Scroll to bottom</a>
+        <div className='filter_container'>
+          <div id="queue_search_id">
+            <label className="queue_search_label">Search:</label>
+            <input onChange={(e)=>getSearchValue(e)} list="queue_search" name="search" id="input_queue"></input>
+              <datalist id="queue_search">
+                {inQueue.map((obj)=>{
+                  return(<option key={obj.id} id={obj.id}>{obj.title}</option>)
+                })}
+              </datalist>
+              <button id="queue_search_btn"><a href={`#${anchored}${inSearch}`}>Search</a></button>
+          </div>
+
+          <div id="queue_filter_id">
+            <label className="filter_label" name="filter"><FaFilter/>Filter:</label>
+            <select className="filter" onChange={(e)=>main(e.target.value)}>
+              <option></option>
+              <option>Ascending</option>
+              <option>Descending</option>
+            </select>
+          </div>
+        </div>
+        <div className="Anime_Statuses">
+          <nav>
+            <span className="Status_btn_holder">
+              <button onClick={(e)=>main("")} className="QueueOptionBtns">All Anime</button>
+              <button onClick={(e)=>main("Watching Now")} className="QueueOptionBtns">Watching Now</button>
+              {/*<Link to="/mal_queue"><button disabled={true} className="QueueOptionBtns">Transfer From MAL</button></Link>*/}
+              {<Link to="/mal_queue_in" state={inQueue}><button className="QueueOptionBtns">Export Queue</button></Link>}
+            </span>
+          </nav>
+        </div>
       <div className='table-container'>
         <table className='main_table'>
         
@@ -276,7 +344,7 @@ const Queue = (props) => {
               <tr>
                 <td className='number_header'>#</td>
                 <td className='img_header'>Image</td>
-                <td className="name_header">Anime Title</td>
+                <td className="name_header">Title</td>
                 <td className="score_header">Score</td>
                 <td className='type_header'>Type</td>
                 <td className='prgs_header'>Progress</td>
@@ -284,12 +352,13 @@ const Queue = (props) => {
                 <td colSpan={1} className='member_header'>Members</td>
                 <td className='dlt_header'>Dlt</td>
               </tr>
-          <QueueHolder active={test} setInQueue={setinQueue} inQueue={inQueue} animeList={props.animeList}/>
+          <QueueHolder active={test} setInQueue={setinQueue} inQueue={inQueue} animeList={props.animeList} click={openModal}/>
           </tbody>
           
         </table>
       </div>
-      <a id="bottom" href="#top">Back to top</a>
+      <a id="toTop" href="#top">Back to top</a>
+      <footer id="bottom"></footer>
     </div>
   )
 }
