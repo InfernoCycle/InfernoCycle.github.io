@@ -26,6 +26,7 @@ function LoginPage(props) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [salt, setSalt] = useState("");
+  const limit = 10;
 
   function salter(){
     var Letters = [];
@@ -89,6 +90,7 @@ function LoginPage(props) {
     let inputs = document.getElementsByTagName("input");
     let username = inputs.namedItem("username").value;
     let password = inputs.namedItem("password").value;
+    let subm = document.getElementById("register_submit_btn");
     
     if(userError || passError || username === undefined || password === undefined){
       return;
@@ -102,7 +104,10 @@ function LoginPage(props) {
     errorLabel.innerHTML = "Invalid Password";
     errorLabel.style.visibility = "hidden";
 
-    const res1 = await client.post(
+    //console.log(username);
+    //console.log(password);
+
+    const res1 = await client.get(
       `retrieve/salt/user=${username}`
     ).then((res)=>{
       return res.data;
@@ -113,21 +118,56 @@ function LoginPage(props) {
     if(res1["Entity"] == null){
       errorLabel.innerHTML = "Invalid credentials entered";
       errorLabel.style.visibility = "visible";
+      props.setAttempts((val)=>{
+        val += 1
+        return val
+      })
+
+      if(props.attempts == 10){
+        inputs.namedItem("username").disabled = true;
+        inputs.namedItem("password").disabled = true;
+        subm.style.backgroundColor = "gray";
+        subm.onmouseover = ()=>{
+          subm.style.backgroundColor = "gray";
+        }
+        //subm.disabled = true;
+        
+        alert("timing you out for 5 seconds");
+        setTimeout(()=>{
+          alert("no longer timed out");
+          inputs.namedItem("username").disabled = false;
+          inputs.namedItem("password").disabled = false;
+          subm.disabled = false;
+          subm.style.backgroundColor = "black";
+        }, 5000)
+
+        props.setAttempts(8);
+      }
+
+      console.log(props.attempts);
       return;
     }
     let salt = res1["Entity"];
+    //console.log(salt);
     let hashPass = hash(password, salt, false)
     //console.log(ha);
 
-    const res = await client.post(
-      `anime/login/u=${username}/ps=${hashPass}/pr=${salt}`
+    //get back the info using the salt we got from first call
+    const res = await client.get(
+      `anime/login/u=${username}/ps=${hashPass}/pr=${salt}`,
+      {
+        data:{
+          username:username,
+          password:hashPass,
+          salt:salt
+        }
+      }
       ).then((res)=>{
         return res.data;
       })
     
-      console.log(res);
+      //console.log(res);
     //hash(res["salt"])
-    
 
     /*const res = await fetch(`https://infernovertigo.pythonanywhere.com/anime/register/u=${username}/ps=${password}/pr=${salt}/m=l/`, 
     {
@@ -143,31 +183,35 @@ function LoginPage(props) {
     .then((res)=>{
       return res.json();
     })*/
-    /*let topAnime = localStorage.getItem("top_anime");
+    let topAnime = localStorage.getItem("top_anime");
     let first_log = localStorage.getItem("First_Log");
     localStorage.clear();
     localStorage.setItem("top_anime", topAnime);
     localStorage.setItem("First_Log", JSON.stringify(false));
   
     for(let i = 0; i < res["Data"].length; i++){
-      let id = JSON.parse(res["Data"][i])["id"];
-      localStorage.setItem(id, res["Data"][i]);
+      //console.log(res["Data"]);
+      let id = res["Data"][i]["id"];
+      //console.log(JSON.stringify(res["Data"][i]));
+      localStorage.setItem(id, JSON.stringify(res["Data"][i]));
     }
-    console.log(res);
-    //console.log(res["Data"][0]);
-    if(res.hash){
-      hash();
-    }
-    else if(res.newUser){  
-      console.log(res);
-    }
-    else if(res.usable){
-      props.setloggedIn(true);
-      
-      console.log("you're now logged in and have an account");
-      props.setUsername(username);
-      navigate("/");
-    }*/
+    //console.log(res)
+    //return;
+    props.setloggedIn(true);
+    
+    //console.log("you're now logged in and have an account");
+    localStorage.setItem("user", username);
+    localStorage.setItem("password", hashPass);
+    localStorage.setItem("salt", salt);
+    localStorage.setItem("user_id", res["id"]);
+    localStorage.setItem("hidden", JSON.stringify(true));
+    //props.settoken(res["token"]);
+    //localStorage.setItem("token", res["token"]);
+    localStorage.setItem("logged_in", JSON.stringify(true));
+    console.log("you're now logged in and have an account");
+    
+    props.setUsername(username);
+    navigate("/");
   }
 
   function showPassword(e){
@@ -228,7 +272,7 @@ function LoginPage(props) {
     //console.log(numberMatch)
     //console.log(letterMatch)
     //console.log(specialMatch)
-    if(e.target.value.length > 20){
+    if(e.target.value.length > 100){
       errorLabel.innerHTML = "Password Too Long";
       errorLabel.style.visibility = "visible";
       setErrorPass((obj)=>{return true;});
@@ -262,7 +306,7 @@ function LoginPage(props) {
   return (
     <div>
       <Header/>
-      <Nav/>
+      <Nav showSearch={true}/>
       <div>
         <div id="reg_form_container">
           <form id="register_form">

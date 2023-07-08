@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import Header from "../../comp/Header"
 import Nav from "../../comp/Nav"
-import {$, jQuery} from 'jquery'
 import sha256 from 'crypto-js'
 import { Link, useNavigate } from 'react-router-dom'
 import Modal from "react-modal";
 import axios from "axios";
+import raw from "../../Banned_Words_2022_05_05.txt"
 
 axios.defaults.xsrfCookieName = "csrftoken";
 axios.defaults.xsrfHeaderName = "X-CSRFToken";
@@ -49,8 +49,44 @@ function RegisterPage(props) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [salt, setSalt] = useState("");
+  const [read, setRead] = useState(false);
+  const [content, setContent] = useState("");
 
   let el;
+
+  async function handler(e){
+    await readBanned(e);
+    UserErrorHandler(e);
+  }
+
+  function bannable(value){
+    const words = content.split(",");
+    for(let i=0; i<words.length; i++){
+      for(let k=0; k<value.length; k++){
+        let formed_word = "";
+        for(let j=k; j<value.toLowerCase().length; j++){
+          formed_word += value.toLowerCase().charAt(j);
+          if(formed_word == words[i]){
+            /*errorLabel.innerHTML="Banned Word";
+            errorLabel.style.visibility="visible";
+            setErrorUser((obj)=>{return true;});*/
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  async function readBanned(e){
+    if(!read){
+      const list = await fetch(raw)
+      .then((res)=>res.text())
+      .then((val)=>val)
+      setRead(true);
+      setContent(list);
+    }
+  }
 
   function openModal() {
     Modal.setAppElement(el);
@@ -97,13 +133,15 @@ function RegisterPage(props) {
     setUsersQueue((obj)=>{
       let temp = [];
       for(let i = 0; i < localStorage.length; i++){
-        if(localStorage.key(i) == "top_anime" || localStorage.key(i) == "First_Log" || localStorage.key(i) == "token"){
+        if(localStorage.key(i) == "salt" || localStorage.key(i) == "password" || localStorage.key(i) == "user" || localStorage.key(i) == "top_anime" || localStorage.key(i) == "First_Log" || localStorage.key(i) == "token" || localStorage.key(i) == "logged_in" || localStorage.key(i) == "user_id"){
+          //console.log(localStorage.key(i))
           continue;
-        }
-        try{
-          temp.push(localStorage.getItem(localStorage.key(i)));
-        }catch{
-          continue;
+        }else{
+          try{
+            temp.push(localStorage.getItem(localStorage.key(i)));
+          }catch{
+            continue;
+          }
         }
       }
       return [...temp];
@@ -114,6 +152,19 @@ function RegisterPage(props) {
     let inputs = document.getElementsByTagName("input");
     let username = inputs.namedItem("username").value;
     let password = inputs.namedItem("password").value;
+    const errorLabel = document.getElementById("form_error");
+
+    const bans = bannable(username, password);
+    if(bans){
+      errorLabel.innerHTML="Banned word detected";
+      errorLabel.style.visibility="visible";
+      setErrorUser(true);
+      return;
+    }else{
+      errorLabel.innerHTML="";
+      errorLabel.style.visibility="hidden";
+      setErrorUser(false);
+    }
 
     var salt = salter()
     var hashedPass = new hashes.SHA256().hex(password + salt);
@@ -164,7 +215,7 @@ function RegisterPage(props) {
     //console.log(numberMatch)
     //console.log(letterMatch)
     //console.log(specialMatch)
-    if(e.target.value.length > 20){
+    if(e.target.value.length > 100){
       errorLabel.innerHTML = "Password Too Long";
       errorLabel.style.visibility = "visible";
       setErrorPass((obj)=>{return true;});
@@ -215,6 +266,7 @@ function RegisterPage(props) {
     if(userError || passError || passReError || username === undefined || password === undefined || salt === undefined){
       return;
     }
+
     setUsername(username);
     setPassword(password);
     setSalt(salt);
@@ -227,7 +279,7 @@ function RegisterPage(props) {
 
   async function sendRequest(){
     let res=null;
-
+    //console.log(usersQueue);
     res = await client.post(
       `anime/register/u=${username}/ps=${password}/pr=${salt}/m=l/`,
       {
@@ -262,18 +314,20 @@ function RegisterPage(props) {
     }catch{
       let temp = 0;
     }
+    //console.log(res)
     
-    
-    console.log(res);
     //console.log(props.token);
     if(res["Data"]==undefined){
       return;
     }
-    for(let i = 0; i < res["Data"].length; i++){
-      let id = JSON.parse(res["Data"][i])["id"];
-      localStorage.setItem(id, res["Data"][i]);
+
+    if(res["Data"].length > 0){
+      for(let i = 0; i < res["Data"].length; i++){
+        let id = JSON.parse(res["Data"][i])["id"];
+        localStorage.setItem(id, res["Data"][i]);
+      }
     }
-    //console.log(res);
+    
     //console.log(res["Data"][0]);
     if(res.hash){
       hash();
@@ -287,11 +341,14 @@ function RegisterPage(props) {
       localStorage.setItem("user", username);
       localStorage.setItem("password", password);
       localStorage.setItem("salt", salt);
-      localStorage.setItem("token", res["token"]);
-      localStorage.setItem("logged_in", true);
+      localStorage.setItem("user_id", res["id"]);
+      localStorage.setItem("hidden", JSON.stringify(true));
+      //localStorage.setItem("token", res["token"]);
+      props.settoken(res["token"]);
+      localStorage.setItem("logged_in", JSON.stringify(true));
       console.log("you're now logged in and have an account");
       props.setUsername(username);
-      //navigate("/");
+      navigate("/");
     }
   }
 
@@ -313,7 +370,7 @@ function RegisterPage(props) {
   return (
     <div>
       <Header/>
-      <Nav/>
+      <Nav showSearch={true}/>
 
       <Modal
         isOpen={modalIsOpen}
@@ -344,7 +401,7 @@ function RegisterPage(props) {
             <legend id="register_legend">Anime Tree</legend>
             <input type="hidden" name="csrfmiddlewaretoken" value=""></input>
             <label style={{display:"block"}} htmlFor="username">Enter a Username:</label>
-            <input onChange={(e)=>UserErrorHandler(e)} name="username" type="text" placeholder='Enter Username'></input>
+            <input onChange={(e)=>handler(e)} name="username" type="text" placeholder='Enter Username'></input>
             <p id="user_error" style={{"visibility":"hidden", "color":"red", "margin":"0px", "fontWeight":"bold"}}>Invalid Username</p>
             <label style={{display:"block"}} htmlFor="password">Enter a Password:</label>
             <input onChange={(e)=>PassErrorHandler(e)} name="password" type="password" placeholder='Enter Password'></input><br></br><input id="showPass" style={{"width":"5%"}} type="checkbox" onClick={(e)=>showPassword(e)}></input><label htmlFor="showPass">Show Password</label>
@@ -353,7 +410,7 @@ function RegisterPage(props) {
             <input onChange={(e)=>REPassErrorHandler(e)} name="re_password" type="password" placeholder='Re-Enter Password'></input>
             <p id="re_pass_error" style={{"visibility":"hidden", "color":"red", "margin":"0px", "fontWeight":"bold"}}>Doesn't match password</p>
             <button type="button" id="register_submit_btn" onClick={(e)=>hash()}>{props.loggedIn ? 'Submit' : 'Submit1'}</button>
-            <p></p>
+            <p id="form_error" style={{"visisbility":"hidden", "color":"red", "fontWeight":"bold"}}></p>
             <Link className='accButtons' to="/login"><a href="#" id="register_link">Already have an account?</a></Link>
 
           </div>

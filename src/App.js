@@ -11,7 +11,9 @@ import Stats from "./comp/Stats";
 import CopyQueue from "./comp/CopyQueue";
 import ExportQueue from "./comp/ExportQueue";
 import RegisterPage from "./AccountsComp/Pages/RegisterPage";
-import LoginPage from "./AccountsComp/Pages/LoginPage"
+import LoginPage from "./AccountsComp/Pages/LoginPage";
+import ProtectRoute from "./ProcessingFrontEnd/protectRoute";
+import Animedetail from "./AccountsComp/Anime_detail";
 import Cookies from "universal-cookie";
 import axios from "axios";
 
@@ -47,15 +49,113 @@ function App() {
   //const [Year, updateYear] = useState(new Date().getFullYear());
   const [results, updateResults] = useState(10);
   const [csrfValue, setCSRF] = useState(null);
+  const [token, setToken] = useState("");
   const [inQueue, setInQueue] = useState([]);
+  const [user_id, setId] = useState(null);
+  const [attempts, setAttempts] = useState(8);
+  var db = null;
+  const [version, setVersion] = useState(1);
+
+  useEffect(()=>{
+    const req = window.indexedDB.open("innerData", 1);
+    
+    //let db = null;
+    req.onerror = (e) =>{
+      console.log("Something failed");
+    }
+
+    req.onsuccess = (e) =>{
+      async function call(){
+        
+        const req2 = await client.get("/anime=info", {
+          headers:{
+            "Content-Type":"application/json"
+          }
+        }).then((res)=>{
+          return res.data
+        })
+
+        db = e.target.result;
+
+        const obj = req2;
+        const MainObject = req2["date_obj"]
+
+        const curVer = localStorage.getItem("version")
+
+        const transact = db.transaction("anime", "readwrite");
+        const objectStore = transact.objectStore("anime");
+        
+        if(curVer == null || JSON.parse(curVer) != obj["version"]){
+          localStorage.setItem("version", obj["version"]);
+
+          objectStore.openCursor().onsuccess = (e2) =>{
+            const cursor = e2.target.result;
+            if(cursor){
+              objectStore.put(MainObject[cursor.key]);
+              delete MainObject[cursor.key];
+              //console.log(`key: ${cursor.key}, title ${cursor.value.title}`)
+              cursor.continue();
+            }else{
+              if(MainObject.length > 0){
+                for(const key in MainObject){
+                  objectStore.add(MainObject[key]);
+                }
+              }
+              //console.log("end of entries");
+            }
+          }
+          //console.log(db);
+        }
+      }
+      call();
+    }
+
+    req.onupgradeneeded = (e) =>{
+      async function call(){
+        db = e.target.result;
+        db.createObjectStore("anime", {keyPath: "id"});
+        //const transact = db.transaction("anime", "readwrite");
+        const anime = e.target.transaction;
+
+        anime.oncomplete = async () =>{
+          const req2 = await client.get("/anime=info", {
+            headers:{
+              "Content-Type":"application/json"
+            }
+          }).then((res)=>{
+            return res.data
+          })
+          
+          const obj = req2;
+          const MainObject = obj["date_obj"]
+          const curVer = localStorage.getItem("version")
+          if(curVer == null || JSON.parse(curVer) < obj["version"]){
+            localStorage.setItem("version", obj["version"]);
+          }
+
+          const transact = db.transaction("anime", "readwrite");
+          const ob = transact.objectStore("anime");
+          for(const key in MainObject){
+            ob.add(MainObject[key]);
+          }
+          //console.log(JSON.parse(localStorage.getItem("version")));
+        }
+
+        console.log(await req);
+        //load up database with new anime info;
+      }
+      call();
+      console.log("upgrade was called");
+    }
+  },[])
 
   useEffect(()=>{
     async function getCSRFIn(){
-      if(localStorage.getItem("token") == null || localStorage.getItem("token") == ''){
+      /*if(localStorage.getItem("token") == null || localStorage.getItem("token") == ''){
         localStorage.setItem("token", "");
         console.log("token is empty right now so no session")
         //return;
-      }
+      }*/
       //"https://infernovertigo.pythonanywhere.com/AB45743939443952/startup"
       /*const res = await fetch("https://infernovertigo.pythonanywhere.com/retrieve/csrf", 
       {"method":"GET",
@@ -68,21 +168,50 @@ function App() {
       //"https://infernovertigo.pythonanywhere.com/AB45743939443952/startup"
       
       let stuff = await client.get("api/setcsrf/");
-      console.log(stuff.data)
+      //console.log(stuff.data)
       let csrfCookie = stuff.data;
 
-      const res2 = await client.get(
-        "check/req",
-        {data:{
-          password:localStorage.getItem("password"),
-          user: localStorage.getItem("user"),
-          salt:localStorage.getItem("salt")
-        }},
-        { headers: 
-          { 'X-CSRFToken': csrfCookie,
-          'Authorization':` Token ${localStorage.getItem("token")}`
-        } 
-        }
+      const res1 = await fetch("https://infernovertigo.pythonanywhere.com/api/ret/gettoken", {
+      method:"POST",
+      body:JSON.stringify({
+        username:localStorage.getItem("user"),
+        password:localStorage.getItem("password"),
+        salt:localStorage.getItem("salt")
+      }),
+      headers:{
+        'Accept': 'application/json',
+        "content-type":"application/json"
+      }
+      })
+      let stuff2 = await res1.json();
+      let token = stuff2["data"];
+
+      if(token == null){
+        /*console.log(token)
+        console.log(csrfCookie)
+        setLoggedIn(false);
+        let top_anime = localStorage.getItem("top_anime")
+        localStorage.clear(); // clean out the localStorage completely
+        //reset all the values
+        localStorage.setItem("user", "");
+        localStorage.setItem("password", "");
+        localStorage.setItem("salt", "");
+        localStorage.setItem("logged_in", JSON.stringify(false));
+        localStorage.setItem("top_anime", top_anime);
+        return;*/
+      }
+      /*console.log(token)
+      console.log(csrfCookie["cookie"])*/
+      const res2 = await axios.get("https://infernovertigo.pythonanywhere.com/check/req",
+      {
+        headers: 
+          { 
+            'X-CSRFToken':csrfCookie["cookie"],
+            'Authorization':` Token ${token}`,
+            "Content-Type":"application/json",
+            "Accept":"application/json"
+          }
+      }
       ).then((response)=>{
         return response.data;
       })
@@ -93,14 +222,33 @@ function App() {
       .then((res)=>{
         return res.json();
       })*/
+      //return;
+      //console.log(res2);
       if(res2["user"]){
         setLoggedIn(true);
+        /*localStorage.setItem("user", res2["name"]);
+        localStorage.setItem("logged_in", JSON.stringify(true));
+        localStorage.setItem("password", res2["password"]);
+        localStorage.setItem("salt", res2["salt"]);*/
         setUsername(localStorage.getItem("user"));
+        //console.log(res2);
       }else{
         setUsername(localStorage.getItem(null));
         setLoggedIn(false);
+        
+        localStorage.setItem("logged_in", JSON.stringify(false));
+        let top_anime = localStorage.getItem("top_anime")
+        localStorage.clear(); // clean out the localStorage completely
+
+        //reset all the values
+        localStorage.setItem("user", "");
+        localStorage.setItem("password", "");
+        localStorage.setItem("salt", "");
+        //localStorage.setItem("token", "");
+        localStorage.setItem("logged_in", JSON.stringify(false));
+        localStorage.setItem("top_anime", top_anime);
       }
-      console.log(res2);
+      //console.log(res2);
 
       //setCSRF(cookies.get("csrftoken"));
       //console.log(cookies.get("csrftoken"));
@@ -112,7 +260,11 @@ function App() {
 
   useEffect(()=>{
     //Check login status
-    //console.log(csrfValue);
+    if(JSON.parse(localStorage.getItem("logged_in")) == true){
+      setLoggedIn(true);
+    }else{
+      setLoggedIn(false);
+    }
   }, [])
 
   //fetch anime
@@ -182,11 +334,13 @@ function App() {
     //console.log(proper, 88)
     var temp = {...proper}
     temp.status = status1;
-    temp.synopsis = "";
+    temp.synopsis = synopsis;
     temp["watching"] = watching;
     temp["rating"] = userRating;
     temp["watched"] = watched;
     temp["broadcast"] = broadcast;
+    temp["modified"] = true;
+    temp["query_id"] = JSON.parse(localStorage.getItem("user_id"))
     //console.log(temp, 94)
 
     const data = localStorage.getItem(id)
@@ -381,6 +535,7 @@ function App() {
       <Router>
         <Routes>
             <Route path="/queue" element={<Queue animeList={AnimeList} status={status} setInQueue={setInQueue} loggedIn={isLoggedIn} setloggedIn={setLoggedIn}/>}/>
+            <Route path="/anime" element={<Animedetail loggedIn={isLoggedIn} setloggedIn={setLoggedIn}/>}/>
             <Route path="/" element={
               <>
                 <ErrorBoundary status={status} addState={addState} 
@@ -400,8 +555,8 @@ function App() {
             <Route path="/stats" element={<Stats  loggedIn={isLoggedIn} setloggedIn={setLoggedIn}/>}/>
             <Route path="/mal_queue" element={<CopyQueue  loggedIn={isLoggedIn} setloggedIn={setLoggedIn}/>}/>
             <Route path="/mal_queue_in" state={inQueue} element={<ExportQueue inQueue={inQueue}  loggedIn={isLoggedIn} setloggedIn={setLoggedIn}/>}/>
-            <Route path="/login" element={<LoginPage token={csrfValue} loggedIn={isLoggedIn} setloggedIn={setLoggedIn}/>}/>
-            <Route path="/register" element={<RegisterPage token={csrfValue} loggedIn={isLoggedIn} setloggedIn={setLoggedIn} setUsername={setUsername}/>}/>
+            <Route path="/login" element={<ProtectRoute><LoginPage settoken={setToken} loggedIn={isLoggedIn} setUsername={setUsername} setloggedIn={setLoggedIn} attempts={attempts} setAttempts={setAttempts}/></ProtectRoute>}/>
+            <Route path="/register" element={<ProtectRoute><RegisterPage settoken={setToken} loggedIn={isLoggedIn} setloggedIn={setLoggedIn} setUsername={setUsername}/></ProtectRoute>}/>
         </Routes>
       </Router>
     </div>

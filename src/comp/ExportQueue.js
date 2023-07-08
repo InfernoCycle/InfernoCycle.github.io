@@ -59,15 +59,63 @@ function ExportQueue(props) {
 //------Review above content to learn how to modify it-------
 
   useEffect(()=>{
-    let res1 = []
-    for(var index = 0; index < localStorage.length; index++){
-      var obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
-      //console.log(obj)
-      if(obj.status === true){
-        res1.push(obj)
+    async function run(){
+      let res1 = []
+      for(var index = 0; index < localStorage.length; index++){
+        var obj = null
+        if(localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id"){
+          continue;
+        }else{
+          try{
+            obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
+            //console.log(obj)
+            if(obj.status === true){
+              res1.push(obj)
+            }
+          }
+          catch{
+            const res1 = await fetch("https://infernovertigo.pythonanywhere.com/api/ret/gettoken", {
+              method:"POST",
+              body:JSON.stringify({
+                username:localStorage.getItem("user"),
+                password:localStorage.getItem("password"),
+                salt:localStorage.getItem("salt")
+              }),
+              headers:{
+                'Accept': 'application/json',
+                "content-type":"application/json"
+              }
+            })
+            let stuff = await res1.json();
+            let token = stuff["data"];
+            //console.log(stuff["data"]);
+
+            const res = await fetch("https://infernovertigo.pythonanywhere.com/anime/logOut",{
+              method:"get",
+              headers:{
+                "Authorization":`Token ${token}`
+              },
+              "credentials":"include"
+            })
+
+            console.log("local storage was tempered with, logging off");
+            props.setloggedIn(false);
+            let top_anime = localStorage.getItem("top_anime")
+            localStorage.clear(); // clean out the localStorage completely
+
+            //reset all the values
+            localStorage.setItem("user", "");
+            localStorage.setItem("password", "");
+            localStorage.setItem("salt", "");
+            localStorage.setItem("logged_in", JSON.stringify(false));
+            localStorage.setItem("top_anime", top_anime);
+            window.location.replace("/");
+          }
+        }
       }
+      insertList([...res1])
     }
-    insertList([...res1])
+    run();
   }, [])
 
   const Alarm = (e) =>{
@@ -77,7 +125,7 @@ function ExportQueue(props) {
   return (
     <>
       <Header loggedIn={props.loggedIn} setloggedIn={props.setloggedIn}/>
-      <Nav/>
+      <Nav showSearch={true}/>
       <h1 style={{textAlign:"center", color:"white"}}>Anime Tree Exporter</h1>
 
       <div style={{textAlign:"center"}}>

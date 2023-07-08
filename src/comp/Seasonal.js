@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react'
 import Nav from './Nav'
 import Header from './Header'
 import Add from './Add'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+
+axios.defaults.xsrfCookieName = "csrftoken";
+axios.defaults.xsrfHeaderName = "x-csrftoken";
+axios.defaults.withCredentials = true;
 
 function getYears(){
     const date = new Date()
@@ -29,6 +35,7 @@ export default function Seasonal(props) {
     const [summer, setSummer] = useState(false);
     const [spring, setSpring] = useState(false); 
     const [fall, setFall] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(()=>{
         if((new Date().getMonth() >= 11 && new Date().getMonth <=2)){
@@ -121,11 +128,28 @@ export default function Seasonal(props) {
         aFunc();
         console.log("This run")
     }, [])*/
-  
+    async function get_anime_info(obj){
+        const res = axios.post("https://infernovertigo.pythonanywhere.com/anime/information", 
+        {
+            data:obj.title
+        }, 
+        {headers:{
+            "Content-Type":"application/json"
+        }
+        }).then((res)=>{
+            return res.data;
+        })
+        console.log(await res);
+        const entity = await res
+
+        //localStorage.setItem("tempSynopsis", entity["entity"]);
+        
+        navigate("/anime", {state:{jinx:obj, synopsis:entity["entity"]}})
+    }
     return (
     <div>
         <Header loggedIn={props.loggedIn} setloggedIn={props.setloggedIn}/>
-        <Nav/>
+        <Nav showSearch={true}/>
         <div className="amount_form_container">
             
             <span id="seasons_window">
@@ -173,13 +197,17 @@ export default function Seasonal(props) {
                  try{
                   return(
                   <div key={obj.mal_id} className='anime-Stuff-test'>
-                    <p className="anime-title-test"><a className="selectedTitle" href={obj.url} target="_blank">{obj.title}</a></p>
-                    <img src={obj.image_url} alt="Anime-pic" width="227" height="321px"/>
+                    <p className="anime-title-test"><Link to="/seasonal" state={{jinx:obj}} onClick={()=>get_anime_info(obj)} className="selectedTitle">{obj.title}</Link></p>
+                    <img src={obj.img_url} alt="Anime-pic" width="227" height="321px"/>
+                    {props.loggedIn?
                     <Add key={obj.mal_id} status={props.status} 
                     img_url={obj.image_url} title={obj.title} id={obj.mal_id} addState={props.addState}
                     url={obj.url} episodes={obj.episodes} synopsis={obj.synopsis} airing={obj.airing}
                     type={obj.type} members={obj.members} start_date={obj.start_date} end_date={obj.end_date}
-                    rated={obj.rated} avgScores={obj.score} english_name={obj.english_name} japanese_name={obj.japanese_name}/>
+                    rated={obj.rated} avgScores={obj.score} english_name={obj.english_name} japanese_name={obj.japanese_name}
+                    broadcast={obj.broadcast}/>
+                    :<></>
+                  }
                   </div>)}catch{
                     <></>
                   }

@@ -8,7 +8,7 @@ export default function About(props) {
   return (
     <div>
       <Header loggedIn={props.loggedIn} setloggedIn={props.setloggedIn}></Header>
-      <Nav/>
+      <Nav showSearch={true}/>
 
       <h1 className="aboutMeTitle">About Me</h1>
       <p className="aboutMePars">

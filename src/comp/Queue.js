@@ -46,21 +46,22 @@ const Queue = (props) => {
   const [isOpening, setIsOpening] = useState(false);
   const [url, loadURL] = useState([]);
 
-  let el;
+  let el = document.getElementById('root') || undefined;
   let subtitle;
   const [modalIsOpen, setIsOpen] = React.useState(false);
 
-  function openModal(opening, id) {
+  async function openModal(opening, id) {
     let ObjectJson = localStorage.getItem(id);
     let title = JSON.parse(ObjectJson)["title"]
     let date = JSON.parse(ObjectJson)["start_date"]
     let year = date.toString().split(",")[1].trim();
+
     if(opening){
       async function retaliate(){
         const res = await fetch(`https://infernovertigo.pythonanywhere.com/anime/music/val=${title}/opening=${opening}/year=${year}`)
         .then((response)=>response.json());
 
-        loadURL((obj)=>res);
+        loadURL((obj)=>res[1]);
       }
       retaliate();
       setIsOpening(true);
@@ -70,7 +71,7 @@ const Queue = (props) => {
         const res = await fetch(`https://infernovertigo.pythonanywhere.com/anime/music/val=${title}/opening=${opening}/year=${year}`)
         .then((response)=>response.json());
 
-        loadURL((obj)=>res);
+        loadURL((obj)=>res[1]);
       }
       retaliate();
       setIsOpening(false);
@@ -96,7 +97,7 @@ const Queue = (props) => {
     
     for(var index = 0; index < localStorage.length; index++){
       var obj = null
-      if(localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user"){
+      if(localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id"){
         continue;
       }else{
         obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
@@ -140,8 +141,9 @@ const Queue = (props) => {
     /*const res = await fetch("http://127.0.0.1:8000/anime/status=true/", {
       signal:Timeout(10).signal
     }).then(response=>response.json())
-
     setinQueue(()=>[...res])*/
+    //console.log(originalQueue)
+    //await putBackOriginal();
     setinQueue(()=>originalQueue);
   }
 
@@ -151,7 +153,7 @@ const Queue = (props) => {
 
     if(option === ""){
       //setinQueue(()=>[...unchange]);
-      console.log("original ran")
+      //console.log("original ran")
       original();
     }
 
@@ -172,23 +174,44 @@ const Queue = (props) => {
     }
   }
 
+  const putBackOriginal = async() =>{
+    let newList = []
+    for(var index = 0; index < localStorage.length; index++){
+      var obj = null
+      if(localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id"){
+        continue;
+      }else{
+        obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
+        //console.log(obj)
+        if(obj.status === true){
+          newList.push(obj);
+        }
+      }
+    }
+
+    setOriginal([...newList]);
+  }
+
   const orderCurWtch = async() =>{
     /*const res1 = await fetch("http://127.0.0.1:8000/anime/watching=true/", {
       signal:Timeout(30).signal
     })
     .then(res=>res.json());*/
 
-    let res1 = []
+    let reser = []
     
     for(var index = 0; index < localStorage.length; index++){
+      if(localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id"){
+        continue;
+      }
       var obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
       //console.log(obj)
       if(obj.watching === true){
-        res1.push(obj);
+        reser.push(obj);
       }
     }
 
-    setinQueue(res1);
+    setinQueue(reser);
     //console.log(res1);
   }
 
@@ -199,7 +222,7 @@ const Queue = (props) => {
     // eslint-disable-next-line
   }, [])
 
-  const test = async(id) =>{
+  const test = async(e, id, status, idx) =>{
     /*const resOut = await fetch(`http://127.0.0.1:8000/anime/${id}/`, {
         signal:Timeout(10).signal
     }).then(res=>res.json());
@@ -226,16 +249,20 @@ const Queue = (props) => {
         localStorage.setItem(id, JSON.stringify(temp));
 
         setinQueue((obj)=>{
-          const newArr = obj.filter((obj)=>{
+          const newArr = obj.filter((obj, idex)=>{
             if(obj.id === id){
               obj.watching = true;
             }
             return obj.status === true || (obj.watching === true && obj.status === true);
           })
+          //console.log(newArr)
+
           return newArr;
         })
+        await putBackOriginal();
 
-        setOriginal(inQueue)
+        //setOriginal(inQueue)
+        
         //setChange(1);
         return;
     }
@@ -257,15 +284,19 @@ const Queue = (props) => {
         temp.watching = false;
         localStorage.setItem(id, JSON.stringify(temp));
         setinQueue((obj)=>{
-          const newArr = obj.filter((obj)=>{
+          const newArr = obj.filter((obj, idex)=>{
             if(obj.id === id){
               obj.watching = false;
             }
             return obj.status === true || (obj.watching === false && obj.status === true)
           })
+          //console.log(newArr)
+
           return newArr;
         })
-        setOriginal(inQueue)
+        await putBackOriginal();
+        //console.log(inQueue)
+        //setOriginal(inQueue)
         //setChange(2);
         return;
     }
@@ -303,8 +334,8 @@ const Queue = (props) => {
         }
       </Modal>
 
-        <Header loggedIn={props.loggedIn} setloggedIn={props.setloggedIn}/>
-        <Nav showSearch={false}/>
+        <Header loggedIn={props.loggedIn} setLoggedIn={props.setloggedIn}/>
+        <Nav showSearch={true}/>
         <a id="toBottom" href="#bottom">Scroll to bottom</a>
         <div className='filter_container'>
           <div id="queue_search_id">
@@ -329,12 +360,10 @@ const Queue = (props) => {
         </div>
         <div className="Anime_Statuses">
           <nav>
-            <span className="Status_btn_holder">
-              <button onClick={(e)=>main("")} className="QueueOptionBtns">All Anime</button>
-              <button onClick={(e)=>main("Watching Now")} className="QueueOptionBtns">Watching Now</button>
-              {/*<Link to="/mal_queue"><button disabled={true} className="QueueOptionBtns">Transfer From MAL</button></Link>*/}
-              {<Link to="/mal_queue_in" state={inQueue}><button className="QueueOptionBtns">Export Queue</button></Link>}
-            </span>
+            <button onClick={(e)=>main("")} className="QueueOptionBtns">All Anime</button>
+            <button onClick={(e)=>main("Watching Now")} className="QueueOptionBtns">Watching Now</button>
+            {/*<Link to="/mal_queue"><button disabled={true} className="QueueOptionBtns">Transfer From MAL</button></Link>*/}
+            {<Link id="exportButton" to="/mal_queue_in" state={inQueue}><button className="QueueOptionBtns">Export Queue</button></Link>}
           </nav>
         </div>
       <div className='table-container'>
@@ -348,9 +377,9 @@ const Queue = (props) => {
                 <td className="score_header">Score</td>
                 <td className='type_header'>Type</td>
                 <td className='prgs_header'>Progress</td>
-                <td className='cscore_header'>CScore</td>
-                <td colSpan={1} className='member_header'>Members</td>
-                <td className='dlt_header'>Dlt</td>
+                {/*<td className='cscore_header'>CScore</td>
+                <td colSpan={1} className='member_header'>Members</td>*/}
+                <td className='dlt_header'></td>
               </tr>
           <QueueHolder active={test} setInQueue={setinQueue} inQueue={inQueue} animeList={props.animeList} click={openModal}/>
           </tbody>

@@ -143,8 +143,36 @@ button:hover{
 .search-box{
   width: 100%;
   margin-top: 0px;
-  
   text-align: center;
+}
+.search-box form{
+  position:relative;
+}
+.search_results{
+  position:"absolute";
+  width:92%;
+  margin-left:4%;
+  text-align: left;
+}
+.search_results > *{
+  position: absolute;
+}
+.result_list{
+  width:92%;
+}
+.search_results p,h3{
+  margin:0px;
+  width:100%;
+}
+.result{
+  background-color: gray;
+  display:inline-flex;
+  height:100px;
+  cursor: pointer;
+}
+.info_cont{
+  overflow-y: auto;
+  overflow-x: auto;
 }
 
 .search-box input{ /**/
@@ -362,18 +390,27 @@ button:hover{
   margin-bottom:2%;
   text-align: center;
 }
+.Anime_Statuses nav{
+  display: flex;
+}
 
+.Anime_Statuses nav > button{
+  flex-grow: 1;
+}
 
 .QueueOptionBtns{
   background-color: white;
   color:black;
-  width:auto;
-  width:19%;
+  /*width:auto;*/
   text-align: center;
   padding:10px;
 }
 .QueueOptionBtns:nth-child(1), :nth-child(2){
   margin-right:1%;
+}
+
+#exportButton{
+  width:100%;
 }
 
 /*Queue Table holding the materials*/
@@ -469,19 +506,19 @@ button:hover{
 }
 
 .name_header{
-  width:35%;/*was auto*/
+  width:40%;/*was auto*/
   text-align: center;
   padding:7px;
 }
 
 .score_header{
   text-align: center;
-  width:10%; /*was auto*/
+  width:20%; /*was auto*/
 }
 
 .prgs_header{
   text-align: center;
-  width:13%;/*was auto*/
+  width:19%;/*was auto*/
 }
 
 .type_header{
@@ -511,6 +548,11 @@ button:hover{
   width:auto;
   text-align: center;
 }
+
+.remove_message{
+  position:absolute;
+}
+
 /*For Queue contents match the size with header thankssss*/
 #queue-container{
   text-align: left;
@@ -556,6 +598,7 @@ button:hover{
   color: rgba(27, 146, 179, 1);
 }
 .selectedTitle:hover{
+  cursor: pointer;
   color:aqua;
 }
 
@@ -875,15 +918,42 @@ span#header_seasonal_result{
 }
 
 /*The stuff*/
+.userImgContainer{
+  text-align: right;
+  width:50%;
+}
 .user_name_header{
   color:white;
   margin-bottom:0px;
+  display:inline;
+  text-align: right;
+  width:50%;
+}
+.user_area{
+  display:inline;
+  position: relative;
 }
 .userName{
+  display:inline-block;
   color:orange;
   font-weight: bolder;
   cursor:pointer;
   margin:0px;
+  font-size: 19px;
+}
+
+.dropdown{
+  font-weight: normal;
+  display:none;
+  position: absolute;
+  right:0px;
+  left:5px;
+  width:100%;
+}
+
+.dropdown_content{
+  background-color: blue;
+  width:inherit;
 }
 
 .common_opt:nth-child(even){
@@ -907,7 +977,13 @@ span#header_seasonal_result{
 }
 
 .common_opt:nth-child(3){
+  text-align: center;
+  width:102%;
   border-radius: 0px 0px 10px 10px;
+}
+
+.common_opt{
+  width:100%;
 }
 
 .common_opt:hover{
@@ -915,16 +991,12 @@ span#header_seasonal_result{
 }
 
 .inner_opt{
+  font-size: 15px;
   color:white;
   font-weight: bolder;
   padding:5px 0px 5px 0px;
 }
 
-.dropdown{
-  position: absolute;
-  width:50%;
-  margin-left:50%;
-}
 #user_dropdown{
   background-color: inherit;
   color:red;
@@ -949,4 +1021,20 @@ option{
   opacity:0.8;
   text-align: center;
   width: 100%;
+}
+
+#header_home:hover{
+  color: darkred;
+}
+
+@media only screen and (max-width: 500px){
+  .Anime_Statuses nav{
+    display: block;
+  }
+  
+  .Anime_Statuses nav > button{
+    display:block;
+    width:100%;
+    margin-bottom: 10px;
+  }
 }
