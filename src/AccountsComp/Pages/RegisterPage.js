@@ -42,6 +42,7 @@ function RegisterPage(props) {
   const [userError, setErrorUser] = useState(true);
   const [passError, setErrorPass] = useState(true);
   const [passReError, setReErrorPass] = useState(true);
+  const [mailError, setErrorEmail] = useState(true);
   const [usersQueue, setUsersQueue] = useState([]);
   const navigate = useNavigate()
   const [modalIsOpen, setIsOpen] = React.useState(false);
@@ -50,7 +51,10 @@ function RegisterPage(props) {
   const [password, setPassword] = useState("");
   const [salt, setSalt] = useState("");
   const [read, setRead] = useState(false);
+  const [saltMail, setMailSalt] = useState("");
+  const [user_mail, setEmail] = useState("");
   const [content, setContent] = useState("");
+  const [domains, setDomains] = useState("");
 
   let el;
 
@@ -60,6 +64,7 @@ function RegisterPage(props) {
   }
 
   function bannable(value){
+    //console.log(value);
     const words = content.split(",");
     for(let i=0; i<words.length; i++){
       for(let k=0; k<value.length; k++){
@@ -130,14 +135,25 @@ function RegisterPage(props) {
     //setErrorUser((obj)=>{return true;});
     //setErrorPass((obj)=>{return true;});
 
+    let domains = ""
+    const domainLimit = 30;
+
+    for(let i=0; i < domainLimit; i++){
+      let copy = "([a-zA-Z0-9-]{1,63}\\.)?";
+      domains = domains + copy;
+    }
+
+    setDomains(domains);
+
     setUsersQueue((obj)=>{
       let temp = [];
       for(let i = 0; i < localStorage.length; i++){
-        if(localStorage.key(i) == "salt" || localStorage.key(i) == "password" || localStorage.key(i) == "user" || localStorage.key(i) == "top_anime" || localStorage.key(i) == "First_Log" || localStorage.key(i) == "token" || localStorage.key(i) == "logged_in" || localStorage.key(i) == "user_id"){
+        if(localStorage.key(i) == "salt" || localStorage.key(i) == "password" || localStorage.key(i) == "user" || localStorage.key(i) == "top_anime" || localStorage.key(i) == "First_Log" || localStorage.key(i) == "token" || localStorage.key(i) == "logged_in" || localStorage.key(i) == "user_id" || localStorage.key(i) == "version" || localStorage.key(i) == "email"){
           //console.log(localStorage.key(i))
           continue;
         }else{
           try{
+            //console.log(localStorage.getItem(localStorage.key(i)))
             temp.push(localStorage.getItem(localStorage.key(i)));
           }catch{
             continue;
@@ -152,6 +168,7 @@ function RegisterPage(props) {
     let inputs = document.getElementsByTagName("input");
     let username = inputs.namedItem("username").value;
     let password = inputs.namedItem("password").value;
+    let email = inputs.namedItem("email").value;
     const errorLabel = document.getElementById("form_error");
 
     const bans = bannable(username, password);
@@ -161,7 +178,7 @@ function RegisterPage(props) {
       setErrorUser(true);
       return;
     }else{
-      errorLabel.innerHTML="";
+      errorLabel.innerHTML="Null";
       errorLabel.style.visibility="hidden";
       setErrorUser(false);
     }
@@ -169,10 +186,15 @@ function RegisterPage(props) {
     var salt = salter()
     var hashedPass = new hashes.SHA256().hex(password + salt);
 
-    submit(username, hashedPass, salt)
+    const hashedMail = new hashes.SHA256().hex(email);
+
+    submit(username, hashedPass, salt, [email, hashedMail]);
   }
 
   function UserErrorHandler(e){
+    const form_err = document.getElementById("form_error");
+    form_err.style.visibility="hidden";
+
     var errorLabel = document.getElementById("user_error")
     //e.target.value.toString().charAt([e.target.value.toString().length-1]) == " "
     //\?\$\%\^\&\*\(\)\#\@\-\_\=\+\!\`\~\\|\'\"\;\:\,\<\\.>\/\{\}
@@ -204,8 +226,52 @@ function RegisterPage(props) {
     }
   }
 
+  function EmailErrorHandler(e){
+    const form_err = document.getElementById("form_error");
+    form_err.style.visibility="hidden";
+    var errorLabel = document.getElementById("mail_error")
+    //e.target.value.toString().charAt([e.target.value.toString().length-1]) == " "
+    //\?\$\%\^\&\*\(\)\#\@\-\_\=\+\!\`\~\\|\'\"\;\:\,\<\\.>\/\{\}
+
+    var matches = e.target.value.match(`^[a-zA-Z0-9\.]+@[a-zA-Z0-9-]{1,63}\\.${domains}[a-zA-Z0-9]{2,63}$`);
+
+    //(com|net|gov|org|edu)
+    //console.log(e.target.value)
+    //console.log(matches)
+    //console.log(mathches)
+    if(matches == null){
+      //console.log("Error")
+      errorLabel.innerHTML = "Invalid Email"
+      errorLabel.style.visibility = "visible";
+      setErrorEmail((obj)=>{return true;});
+      return;
+    }
+    if(e.target.value.length > 256){
+      errorLabel.innerHTML = "Email Too Long"
+      errorLabel.style.visibility = "visible";
+      setErrorEmail((obj)=>{return true;});
+      return
+    }
+    if(e.target.value.length == 0){
+      errorLabel.innerHTML = "Email cannot be blanked."
+      errorLabel.style.visibility = "visible";
+      setErrorEmail((obj)=>{return true;});
+    }
+    else{
+      //console.log(e.target.value.length)
+      errorLabel.style.visibility = "hidden";
+      setErrorEmail((obj)=>{return false;});
+    }
+  }
+
   function PassErrorHandler(e){
+    const form_err = document.getElementById("form_error");
+    form_err.style.visibility="hidden";
     var errorLabel = document.getElementById("pass_error");
+    var reError = document.getElementsByTagName("input");
+    const rePass = reError.namedItem("re_password");
+    let errorLabel1 = document.getElementById("re_pass_error");
+
     //e.target.value.toString().charAt([e.target.value.toString().length-1]) == " "
     //\?\$\%\^\&\*\(\)\#\@\-\_\=\+\!\`\~\\|\'\"\;\:\,\<\\.>\/\{\}
     //let numberMatch = e.target.value.match("[0-9]{1,10}");
@@ -238,16 +304,33 @@ function RegisterPage(props) {
       errorLabel.innerHTML = "Password cannot be blanked."
       errorLabel.style.visibility = "visible";
       setErrorPass((obj)=>{return true;});
+      return;
+    }
+    if(rePass.value.length > 0){
+      if(e.target.value != rePass.value){
+        errorLabel1.innerHTML = "Password doesn't match";
+        errorLabel1.style.visibility = "visible";
+        setErrorPass((obj)=>{return true;});
+      }
+      else{
+        errorLabel.style.visibility = "hidden";
+        errorLabel1.style.visibility = "hidden";
+        setErrorPass((obj)=>{return false;});
+        setReErrorPass((obj)=>{return false;});
+      }
     }
     else{
       //console.log(e.target.value)
       //console.log(e.target.value.length)
       errorLabel.style.visibility = "hidden";
+      errorLabel1.style.visibility = "hidden";
       setErrorPass((obj)=>{return false;});
     }
   }
 
   function REPassErrorHandler(e){
+    const form_err = document.getElementById("form_error");
+    form_err.style.visibility="hidden";
     let errorLabel = document.getElementById("re_pass_error");
     let inputs = document.getElementsByTagName("input");
     let password = inputs.namedItem("password").value;
@@ -262,14 +345,21 @@ function RegisterPage(props) {
     }
   }
 
-  async function submit(username, password, salt){
-    if(userError || passError || passReError || username === undefined || password === undefined || salt === undefined){
+  async function submit(username, password, salt, mailPackage){
+    if(userError || passError || passReError || mailError || username === undefined || password === undefined || salt === undefined){
+      console.log("userError: ", userError);
+      console.log("passError: ", passError);
+      console.log("rePassError: ", passReError);
+      console.log("emailError: ", mailError);
+      console.log("problem")
       return;
     }
 
     setUsername(username);
     setPassword(password);
     setSalt(salt);
+    setEmail(mailPackage[1]);
+    //console.log(mailPackage[1]);
 
     openModal();
     //console.log(usersQueue);
@@ -278,12 +368,17 @@ function RegisterPage(props) {
   }
 
   async function sendRequest(){
+    const form_err = document.getElementById("form_error");
+    const loadIcon = document.getElementById("registerLoader");
+    loadIcon.style.visibility = "visible";
+    closeModal();
+
     let res=null;
     //console.log(usersQueue);
     res = await client.post(
-      `anime/register/u=${username}/ps=${password}/pr=${salt}/m=l/`,
+      `anime/register`,
       {
-        data:usersQueue
+        data:{"users_queue":usersQueue, "username":username, "password":password, "salt":salt, "email":user_mail}
       }
     ).then((res)=>{
       return res.data;
@@ -305,6 +400,8 @@ function RegisterPage(props) {
       .then((res)=>{
         return res.json();
       })*/
+      //console.log(usersQueue.length)
+      //console.log(res)
 
       let topAnime = localStorage.getItem("top_anime");
       let first_log = localStorage.getItem("First_Log");
@@ -315,7 +412,7 @@ function RegisterPage(props) {
       let temp = 0;
     }
     //console.log(res)
-    
+
     //console.log(props.token);
     if(res["Data"]==undefined){
       return;
@@ -328,16 +425,27 @@ function RegisterPage(props) {
       }
     }
     
-    //console.log(res["Data"][0]);
     if(res.hash){
       hash();
       sendRequest()
     }
-    else if(res.newUser){  
-      console.log(res);
+    else if(!res.newUser){  
+      form_err.textContent = "Username is already taken";
+      form_err.style.visibility = "visible";
+      loadIcon.style.visibility = "hidden";
+      //console.log("invalid username")
+      return;
+    }
+    if(!res.usableEmail){
+      form_err.textContent = "Email is already being used";
+      form_err.style.visibility = "visible";
+      loadIcon.style.visibility = "hidden";
+      //console.log("invalid email")
+      return;
     }
     else if(res.usable){
       props.setloggedIn(true);
+      localStorage.setItem("email", user_mail);
       localStorage.setItem("user", username);
       localStorage.setItem("password", password);
       localStorage.setItem("salt", salt);
@@ -369,8 +477,8 @@ function RegisterPage(props) {
 
   return (
     <div>
-      <Header/>
-      <Nav showSearch={true}/>
+      {/*<Header/>
+      <Nav showSearch={true}/>*/}
 
       <Modal
         isOpen={modalIsOpen}
@@ -403,18 +511,22 @@ function RegisterPage(props) {
             <label style={{display:"block"}} htmlFor="username">Enter a Username:</label>
             <input onChange={(e)=>handler(e)} name="username" type="text" placeholder='Enter Username'></input>
             <p id="user_error" style={{"visibility":"hidden", "color":"red", "margin":"0px", "fontWeight":"bold"}}>Invalid Username</p>
+            <label style={{display:"block"}} htmlFor="email">Enter Valid Email:</label>
+            <input onChange={(e)=>EmailErrorHandler(e)} name="email" type="text" placeholder='Enter Email'></input>
+            <p id="mail_error" style={{"visibility":"hidden", "color":"red", "margin":"0px", "fontWeight":"bold"}}>Invalid Email</p>
             <label style={{display:"block"}} htmlFor="password">Enter a Password:</label>
             <input onChange={(e)=>PassErrorHandler(e)} name="password" type="password" placeholder='Enter Password'></input><br></br><input id="showPass" style={{"width":"5%"}} type="checkbox" onClick={(e)=>showPassword(e)}></input><label htmlFor="showPass">Show Password</label>
             <p id="pass_error" style={{"visibility":"hidden", "color":"red", "margin":"0px", "fontWeight":"bold"}}>Invalid Password</p>
             <label style={{display:"block"}} htmlFor="re_password">Re-Enter a Password:</label>
             <input onChange={(e)=>REPassErrorHandler(e)} name="re_password" type="password" placeholder='Re-Enter Password'></input>
             <p id="re_pass_error" style={{"visibility":"hidden", "color":"red", "margin":"0px", "fontWeight":"bold"}}>Doesn't match password</p>
-            <button type="button" id="register_submit_btn" onClick={(e)=>hash()}>{props.loggedIn ? 'Submit' : 'Submit1'}</button>
-            <p id="form_error" style={{"visisbility":"hidden", "color":"red", "fontWeight":"bold"}}></p>
+            <button type="button" id="register_submit_btn" onClick={(e)=>hash()}>{props.loggedIn ? 'Submit' : 'Submit'}</button>
+            <p id="form_error" style={{"visisbility":"hidden", "color":"red", "fontWeight":"bold"}}>Null</p>
             <Link className='accButtons' to="/login"><a href="#" id="register_link">Already have an account?</a></Link>
 
           </div>
         </form>
+        <div id="registerLoader" className="loader"></div>
         <footer></footer>
       </div>
     </div>

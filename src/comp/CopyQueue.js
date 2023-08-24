@@ -5,8 +5,8 @@ import Header from './Header'
 function CopyQueue() {
   return (
     <>
-      <Header/>
-      <Nav/>
+      {/*<Header/>
+      <Nav/>*/}
       <h1 style={{textAlign:"center", color:"white"}}>MAL Anime Queue Copier</h1>
 
       <div style={{textAlign:"center"}}>

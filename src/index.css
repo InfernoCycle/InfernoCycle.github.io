@@ -81,6 +81,20 @@ a:visited{
   }
 }
 
+@media (max-width: 460px){
+  .anime-list{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  #top-anime-container{
+    display:grid;
+    grid-template-columns: 90%;
+    width:80%;
+    margin-left:10%;
+    justify-content: center;
+  }
+}
+
 .top-anime-title{
   text-align: center;
 }
@@ -111,10 +125,24 @@ button:hover{
   margin-bottom: 10px;
 }
 
+.emptyExtraContent{
+  width:227px;
+  margin-bottom:50px;
+}
+
+.viewMore{
+  margin-top:50%;
+  position:relative;
+  font-size:40px;
+  text-align: center;
+  color:silver;
+}
+
 .topAnimePic-container{
   height:321px;
   width:227px;
   background-color: red;
+  position: relative;
 }
 
 .topAnimePic{
@@ -139,12 +167,10 @@ button:hover{
   --linkMarginLeft:2%;
 }
 
-
 .search-box{
-  width: 100%;
-  margin-top: 0px;
-  text-align: center;
+  width:100%;
 }
+
 .search-box form{
   position:relative;
 }
@@ -159,17 +185,41 @@ button:hover{
 }
 .result_list{
   width:92%;
+  max-height:400px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  z-index: 1;
 }
 .search_results p,h3{
   margin:0px;
   width:100%;
 }
 .result{
-  background-color: gray;
-  display:inline-flex;
+  background-color: purple;
+  display:flex;
   height:100px;
+  width:100%;
   cursor: pointer;
+  border-bottom:2px black solid;
 }
+.linkHorizon{
+  margin:0px;
+  color:black;
+}
+.search_info{
+  display:block;
+}
+.search_info > h1{
+  margin:0px;
+  margin-left:10px;
+  width:100%;
+}
+.search_info > p{
+  margin-top:10px;
+  margin-left:10px;
+  width:100%;
+}
+
 .info_cont{
   overflow-y: auto;
   overflow-x: auto;
@@ -184,16 +234,17 @@ button:hover{
   border:none;
   padding:20px;
 }
-
+#show{
+  background-color: black;
+  color:red;
+  width:40%;
+  margin-left:4%;
+  border-radius: 10px;
+  display:inline;
+  padding:5px 0px 5px 0px;
+}
 
 @media screen and (max-width: 699px) and (min-width:200px){
-  .search-box{
-    width: 100%;
-    margin-top: 5px;
-    
-    text-align: center;
-  }
-  
   .search-box input{ /**/
     width:92%;
     border-radius: 5px;
@@ -202,6 +253,16 @@ button:hover{
     color:white;
     border:none;
     padding:20px;
+    margin-top:3px;
+  }
+  #show{
+    background-color: black;
+    color:red;
+    width:92%;
+    margin-left:0%;
+    padding:5px 0px 5px 0px;
+    margin-top:5px;
+    border-radius: 10px;
   }
 }
 
@@ -242,13 +303,14 @@ button:hover{
   .left{
     display:flex;
     width: 100%;
+    margin-left:0%;
   }
 }
 
 .Link{
   height: var(--linkHeight);
   /*float: left;*/
-  width:25%;
+  width:33%;
   margin-left:var(--linkMarginLeft);
 }
 
@@ -285,22 +347,29 @@ button:hover{
   margin:0px;
   color:white;
   font-weight: bold;
+  width:99%;
 }
 
-.anime-title-top{
-  position:relative;
-  bottom:50px;
+.anime-title-background{
+  background-color: rgba(255,255,255, 0.6);
+  border-radius: 10px;
+}
+
+.anime-title{
+  position:absolute;
+  bottom:10px;
   margin:0px 0px 0px 2px;
   font-weight: bold;
-  font-size:15px;
-  display:none;
+  font-size:17px;
+  display:block;
+  color:black;
 }
 
 .selectedTitle2{
-  background-color: yellow;
   display:block;
   border-radius: 10px;
   color:black;
+  text-align: center;
 }
 .selectedTitle2:hover{
   color: orange;
@@ -509,6 +578,9 @@ button:hover{
   width:40%;/*was auto*/
   text-align: center;
   padding:7px;
+}
+.titleClick{
+  cursor:pointer;
 }
 
 .score_header{
@@ -917,6 +989,12 @@ span#header_seasonal_result{
   color:orange;
 }
 
+#form_error{
+  margin-top:5px;
+  margin-bottom:0px;
+  visibility: hidden;
+}
+
 /*The stuff*/
 .userImgContainer{
   text-align: right;
@@ -949,6 +1027,7 @@ span#header_seasonal_result{
   right:0px;
   left:5px;
   width:100%;
+  z-index: 1;
 }
 
 .dropdown_content{
@@ -1037,4 +1116,325 @@ option{
     width:100%;
     margin-bottom: 10px;
   }
+}
+
+/*anime details page*/
+#detail_container{
+  margin:0% 10% 0% 10%;
+}
+#detail_container > h1{
+  background-color: lightgray;
+  color:black;
+  padding:5px;
+  margin:5px 0px 0px 0px;
+  border-bottom: 3px solid white;
+}
+
+#inner_detail_cont{
+  display:block;
+}
+
+.detail_headers{
+  color:white;
+}
+
+#synopsis_cont{
+  margin:0px 20px 0px 20px;
+  width:100%;
+  height:auto;
+}
+
+#synopsis_title{
+  width:auto;
+  margin:0px;
+}
+#synopsis{
+  width:100%;
+  color:white;
+  font-size: 20px;
+}
+
+#img_cont{
+  margin:0px;
+  margin-top:10px;
+  display:flex;
+  justify-content: center;
+}
+
+#img_cont > img{
+  display:block;
+  margin:0px;
+}
+#additional_info{
+  width:100%;
+  font-size: 15px;
+  color:white;
+  margin-bottom:50px;
+}
+
+#additional_info>span{
+  display:block;
+  text-align: left;
+  margin-bottom:10px;
+  font-weight: normal;
+}
+.infoHeads{
+  color:darkcyan;
+  font-weight: bolder;
+  margin-right:4px;
+}
+#additional_info>span:nth-child(1){
+  margin-top:10px;
+}
+.info_header{
+  color:white;
+  margin-top:50px;
+}
+.info_header:nth-child(1){
+  margin-left:0px;
+}
+
+#features{
+  text-align: center;
+  margin-top:10px;
+}
+
+#info_user_area{
+  margin-top:50px;
+  margin-bottom:50px;
+  width:100%;
+  display:inline-flex;
+  text-align: left;
+}
+.feature_btns{
+  width:100%;
+}
+
+/*redirect page*/
+#redirect_cont{
+
+  margin:50px auto 50px auto;
+  width:80%;
+  text-align: center;
+  padding:20px 0px 20px 0px;
+}
+
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+  margin:0px auto 50px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#loading_id{
+  font-weight: bolder;
+  font-size:20px;
+  color:white;
+}
+
+/*leaderboard*/
+#table_cont{
+  width:80%;
+  margin-left:10%;
+}
+#leaderboard_table{
+  width:100%;
+  margin:0px 0% 0px 0%;
+  /*border-radius: 20px;*/
+  border-spacing: 0px;
+  border:2px solid white;
+  border-collapse: collapse;
+  overflow: scroll;
+}
+#leaderboard_table > tr > th{
+  background-color: orange;
+}
+#leaderboard_table > tr,td{
+  border:2px solid black;
+}
+#leaderboard_table > tr > td{
+  text-align: center;
+  padding:10px;
+  font-weight: bolder;
+  color:black;
+}
+#firstPlace{
+  background-color:gold;
+}
+#secondPlace{
+  background-color:silver;
+}
+#thirdPlace{
+  background-color:burlywood;
+}
+.subRows{
+  /*background-color: rgba(115, 80, 148, 0.877);*/
+  background-color: rgba(239, 237, 241, 0.877);
+}
+#table_title{
+  text-align: center;
+  width:80%;
+  margin-left:10%;
+  color:white;
+  margin-bottom: 0px;
+}
+
+/*Leaderboard scroll*/
+.page_scroll{
+  width:80%;
+  margin-left:10%;
+  margin-top:50px;
+}
+.page_scroll>div>a,span{
+  text-align: center;
+  margin-right:10px;
+  margin-bottom:20px;
+  /*padding-top:10px;*/
+  width:auto;
+  display:inline-flex;
+  font-weight: bolder;
+  color:orange;
+}
+.page_scroll>div >a:hover{
+  cursor:pointer;
+}
+.changeBtns{
+  width:70px;
+  height:30px;
+  border-radius:20px;
+  padding-bottom:0px;
+  padding-top:0px;
+  text-align: center;
+  background-color: lightgray;
+}
+.selectedPage{
+  background-color: gray;
+  border-radius: 40%;
+  padding:2px;
+}
+.select_cont{
+  text-align: center;
+}
+#usr_rank_cont{
+  text-align: center;
+  color:red
+}
+#usr_rank{
+  color:white;
+}
+#your_person{
+  background-color: purple;
+}
+
+/*extras*/
+#recovery_cont{
+  width:80%;
+  margin:50px 10% 0px auto;
+}
+#recovery_form{
+  display:block;
+  width:100%;
+  text-align: center;
+  margin:0px auto 0px auto;
+}
+#recovery_form > fieldset{
+  border-radius: 10px;
+}
+#recovery_form > fieldset > legend{
+  font-size:17px;
+  font-weight:bolder;
+  color:orange;
+}
+#recovery_form > fieldset > label{
+  font-weight: bolder;
+  color: silver;
+}
+#recovery_input{
+  font-weight: bolder;
+  padding:5px;
+  width:50%;
+}
+#recovery_button{
+  margin-top:20px;
+  width:20%;
+  padding:10px;
+  font-weight: bolder;
+  border-radius: 10px;
+  text-align: center;
+  background-color: white;
+  color:black;
+}
+@media (max-width: 450px){
+  #recovery_input{
+    font-weight: bolder;
+    padding:5px;
+    width:70%;
+  }
+  #recovery_button{
+    margin-top:20px;
+    width:60%;
+    padding:10px;
+    font-weight: bolder;
+    border-radius: 10px;
+    text-align: center;
+    background-color: white;
+    color:black;
+  }
+}
+
+#recovery_button:hover{
+  cursor:pointer;
+  background-color: green;
+}
+#recoveryLoader{
+  width:10px;
+  height:10px;
+  display:none;
+}
+#rec_email_success{
+  color:green;
+  text-align: center;
+  font-weight: bolder;
+  display:none;
+}
+
+/* extra */
+#loginLoader{
+  width:30px;
+  height:30px;
+  visibility: hidden;
+}
+
+#registerLoader{
+  width:30px;
+  height:30px;
+  visibility: hidden;
+}
+
+.homeLoader{
+  margin-top:100px;
+}
+
+#loading_id2{
+  width:80%;
+  margin-left:10%;
+  text-align: center;
+}
+
+#searching{
+  color:darkgray;
+  width:90%;
+  background-color: orange;
+  font-weight: bolder;
+  text-align: left;
+  margin-left: 4%;
+  display:none;
 }

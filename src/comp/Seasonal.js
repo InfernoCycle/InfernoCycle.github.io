@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import Nav from './Nav'
 import Header from './Header'
 import Add from './Add'
-import { Link, useNavigate } from 'react-router-dom'
+import Buttons from './Buttons'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
 axios.defaults.xsrfCookieName = "csrftoken";
@@ -36,10 +37,11 @@ export default function Seasonal(props) {
     const [spring, setSpring] = useState(false); 
     const [fall, setFall] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(()=>{
         if((new Date().getMonth() >= 11 && new Date().getMonth <=2)){
-            console.log("it's winter")
+            //console.log("it's winter")
             updateseason((obj)=>{
                 setWinter(true);
                 //fall = false;
@@ -49,7 +51,7 @@ export default function Seasonal(props) {
             })
         }
         if((new Date().getMonth() >= 2 && new Date().getMonth() <= 5)){
-            console.log("it's spring")
+            //console.log("it's spring")
             updateseason((obj)=>{
                 setSpring(true);
                 //fall = false;
@@ -59,7 +61,7 @@ export default function Seasonal(props) {
             })
         }
         if((new Date().getMonth() >= 6 && new Date().getMonth() <= 8)){
-            console.log("it's summer")
+            //console.log("it's summer")
             updateseason((obj)=>{
                 setSummer(true);
                 //fall = false;
@@ -69,7 +71,7 @@ export default function Seasonal(props) {
             })
         }
         if((new Date().getMonth() >= 9 && new Date().getMonth() <= 11)){
-            console.log("it's fall")
+            //console.log("it's fall")
             updateseason((obj)=>{
                 setFall(true);
                 //summer = false;
@@ -129,30 +131,31 @@ export default function Seasonal(props) {
         console.log("This run")
     }, [])*/
     async function get_anime_info(obj){
-        const res = axios.post("https://infernovertigo.pythonanywhere.com/anime/information", 
+        const res = await fetch("https://infernovertigo.pythonanywhere.com/anime/information", 
         {
-            data:obj.title
-        }, 
-        {headers:{
-            "Content-Type":"application/json"
-        }
+            method:"POST",
+            body:JSON.stringify({"title":obj.title, "id":obj.mal_id}),
+         
+            headers:{
+                "Content-Type":"application/json"
+            }
         }).then((res)=>{
-            return res.data;
+            return res.json();
         })
-        console.log(await res);
-        const entity = await res
+        //console.log(res);
+        //const entity = await res;
 
         //localStorage.setItem("tempSynopsis", entity["entity"]);
         
-        navigate("/anime", {state:{jinx:obj, synopsis:entity["entity"]}})
+        navigate("/anime", {state:{jinx:obj, synopsis:res["entity"]}})
     }
     return (
     <div>
-        <Header loggedIn={props.loggedIn} setloggedIn={props.setloggedIn}/>
-        <Nav showSearch={true}/>
+        {/*<Header loggedIn={props.loggedIn} setloggedIn={props.setloggedIn}/>
+        <Nav showSearch={true}/>*/}
         <div className="amount_form_container">
             
-            <span id="seasons_window">
+            {/*<span id="seasons_window">
                 <label className="seasonal_text" htmlFor="season">Season: </label>
                 <select onChange={(e)=>getSeason(e)} name="selector" id="season">
                     <option selected={fall}>Fall</option>
@@ -160,54 +163,46 @@ export default function Seasonal(props) {
                     <option selected={spring}>Spring</option>
                     <option selected={summer}>Summer</option>
                 </select>
-            </span>
+    </span>*/}
 
-            <span id="years_window">
+            {/*<span id="years_window">
                 <label className="seasonal_text" htmlFor="year">Year: </label>
                 <select onChange={(e)=>getYear(e)} name="selector" id="year">
                     {getYears().map((obj)=>{
                         return(<option>{obj}</option>)
                     })}
                 </select>
-            </span>
+                </span>*/}
 
             <br></br>
 
-            <div id="results_window">
+            {/*<div id="results_window">
                 <label className="seasonal_text" id="seasonal_label_amount" htmlFor="selector">Show: </label>
                 <select onChange={(e)=>getNumResults(e)} name="selector_amount" id="amount">
                     <option>10</option>
                     <option>15</option>
                     <option>20</option>
                     <option>25</option>
-                </select>
+            </select>*/}
                 {/*<input type="button" value="Submit"></input>*/}
                 
-                <span className="seasonal_text" id="header_seasonal_result">Results</span>
+                {/*<span className="seasonal_text" id="header_seasonal_result">Results</span>
                 
                 <p></p>
                 <button id="submission" onClick={(e)=>changeSeason(e)} value="Confirm">Confirm</button>
-            </div>
+            </div>*/}
         </div>
 
         <div className='mainContent'>
-              <h2>{Season} {Year}:</h2>
+              <h2>{Season} {Year} Anime:</h2>
               <div className='anime-list'>
-               {props.seasonAnime.map((obj)=>{
+               {location.state.jinx.map((obj)=>{
                  try{
+                    return(<div id="top-anime-container"><Buttons key={obj.mal_id} object={obj}/></div>)
                   return(
                   <div key={obj.mal_id} className='anime-Stuff-test'>
-                    <p className="anime-title-test"><Link to="/seasonal" state={{jinx:obj}} onClick={()=>get_anime_info(obj)} className="selectedTitle">{obj.title}</Link></p>
+                    <p className="anime-title-test"><a state={{jinx:obj}} onClick={()=>get_anime_info(obj)} className="selectedTitle">{obj.title}</a></p>
                     <img src={obj.img_url} alt="Anime-pic" width="227" height="321px"/>
-                    {props.loggedIn?
-                    <Add key={obj.mal_id} status={props.status} 
-                    img_url={obj.image_url} title={obj.title} id={obj.mal_id} addState={props.addState}
-                    url={obj.url} episodes={obj.episodes} synopsis={obj.synopsis} airing={obj.airing}
-                    type={obj.type} members={obj.members} start_date={obj.start_date} end_date={obj.end_date}
-                    rated={obj.rated} avgScores={obj.score} english_name={obj.english_name} japanese_name={obj.japanese_name}
-                    broadcast={obj.broadcast}/>
-                    :<></>
-                  }
                   </div>)}catch{
                     <></>
                   }

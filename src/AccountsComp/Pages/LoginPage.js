@@ -87,11 +87,17 @@ function LoginPage(props) {
   }
   
   async function sendRequest(){
+    const formError = document.getElementById("form_error");  
+    formError.style.visibility = "hidden";
+
+    const loader = document.getElementById("loginLoader");
+    loader.style.visibility = "visible";
+
     let inputs = document.getElementsByTagName("input");
     let username = inputs.namedItem("username").value;
     let password = inputs.namedItem("password").value;
     let subm = document.getElementById("register_submit_btn");
-    
+
     if(userError || passError || username === undefined || password === undefined){
       return;
     }
@@ -123,6 +129,8 @@ function LoginPage(props) {
         return val
       })
 
+      loader.style.visibility = "hidden";
+
       if(props.attempts == 10){
         inputs.namedItem("username").disabled = true;
         inputs.namedItem("password").disabled = true;
@@ -132,7 +140,7 @@ function LoginPage(props) {
         }
         //subm.disabled = true;
         
-        alert("timing you out for 5 seconds");
+        alert("timing you out for 5 seconds due to consecutive failed attempts");
         setTimeout(()=>{
           alert("no longer timed out");
           inputs.namedItem("username").disabled = false;
@@ -183,12 +191,22 @@ function LoginPage(props) {
     .then((res)=>{
       return res.json();
     })*/
+
+    try{
+      const l = res["Data"].length;
+    }catch(e){   
+      formError.innerText = "Invalid Credentials";
+      formError.style.visibility = "visible";
+
+      loader.style.visibility = "hidden";
+      return;
+    }
+
     let topAnime = localStorage.getItem("top_anime");
     let first_log = localStorage.getItem("First_Log");
     localStorage.clear();
     localStorage.setItem("top_anime", topAnime);
     localStorage.setItem("First_Log", JSON.stringify(false));
-  
     for(let i = 0; i < res["Data"].length; i++){
       //console.log(res["Data"]);
       let id = res["Data"][i]["id"];
@@ -211,6 +229,8 @@ function LoginPage(props) {
     console.log("you're now logged in and have an account");
     
     props.setUsername(username);
+
+    loader.style.visibility = "hidden";
     navigate("/");
   }
 
@@ -305,8 +325,8 @@ function LoginPage(props) {
   }
   return (
     <div>
-      <Header/>
-      <Nav showSearch={true}/>
+      {/*<Header/>
+      <Nav showSearch={true}/>*/}
       <div>
         <div id="reg_form_container">
           <form id="register_form">
@@ -319,14 +339,18 @@ function LoginPage(props) {
               <p id="user_error" style={{"visibility":"hidden", "color":"red", "margin":"0px", "fontWeight":"bold"}}>Invalid Username</p>
               
               <label style={{display:"block"}} htmlFor="password">Enter a Password:</label>
-              <input onChange={(e)=>PassErrorHandler(e)} name="password" type="password" placeholder='Enter Password'></input><br></br><input id="showPass" style={{"width":"5%"}} type="checkbox" onClick={(e)=>showPassword(e)}></input><label htmlFor="showPass">Show Password</label>
+              <input onChange={(e)=>PassErrorHandler(e)} name="password" type="password" placeholder='Enter Password'></input><br></br>
+              <input id="showPass" style={{"width":"5%"}} type="checkbox" onClick={(e)=>showPassword(e)}></input><label htmlFor="showPass">Show Password</label>
               <p id="pass_error" style={{"visibility":"hidden", "color":"red", "margin":"0px", "fontWeight":"bold"}}>Invalid Password</p>
               
-              <button type="button" id="register_submit_btn" onClick={(e)=>sendRequest()}>{props.loggedIn ? 'Submit' : 'Submit1'}</button>
-              <p></p>
+              <span><Link to="/recovery">Forgot Password?</Link></span><br></br>
+
+              <button type="button" id="register_submit_btn" onClick={(e)=>sendRequest()}>{props.loggedIn ? 'Submit' : 'Submit'}</button>
+              <p id="form_error" style={{"visibility":"hidden", "color":"red", "margin":"0px", "fontWeight":"bold"}}>Invalid Credentials</p>
               <Link className='accButtons' to="/register"><a href="#" id="register_link">Don't have an account?</a></Link>
             </div>
           </form>
+          <div id="loginLoader" className="loader"></div>
         </div>
       </div>
     </div>

@@ -7,7 +7,7 @@ axios.defaults.withCredentials=true;
 const Add = (props) => {
   const [status, setStatus] = useState(false);
   const [buttonObj, setButtonObj] = useState("");
-  const [text, setText] = useState("Add");
+  const [text, setText] = useState("Add To List");
 
   const process = async(id) =>{
     /*const res = await fetch(`http://127.0.0.1:8000/anime`, {mode:"cors"});
@@ -19,11 +19,11 @@ const Add = (props) => {
     //if(FilteredData[0].status == true){
     if(FilteredData.status == true){
       //console.log(FilteredData.status)
-      setText("Remove");
+      setText("Remove From List");
       setStatus(true);
     }
     else{
-      setText("Add");
+      setText("Add To List");
       setStatus(false);
     }
   }
@@ -35,7 +35,7 @@ const Add = (props) => {
     console.log("intermediary ran")*/
     if(status === false){
       setStatus(true);
-      setText("Remove");
+      setText("Remove From List");
       props.addState(props.id, true, props.title, props.img_url, 
         props.url, props.episodes, props.avgScores, props.type,
         props.synopsis, props.airing, props.start_date, props.end_date, 
@@ -43,7 +43,7 @@ const Add = (props) => {
         props.broadcast)
     }else{
       setStatus(false);
-      setText("Add");
+      setText("Add To List");
       //console.log(props.start_date)
       props.addState(props.id, false, props.title, props.img_url, 
         props.url, props.episodes, props.avgScores, props.type,
@@ -86,11 +86,7 @@ const Add = (props) => {
   }, [])
 
   return (
-    <>
-      <div id="info-box-test">
-        <button onClick={(e)=>intermediary(e)} className="add-btn">{text}</button>
-      </div>
-    </>
+    <button onClick={(e)=>intermediary(e)} className="feature-btns">{text}</button>
   )
 }
 

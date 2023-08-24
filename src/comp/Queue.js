@@ -6,6 +6,7 @@ import QueueHolder from './QueueHolder'
 import {FaFilter} from "react-icons/fa"
 import Modal from "react-modal";
 import { Link } from 'react-router-dom'
+import { HashLink as LinkV2 } from 'react-router-hash-link';
 import QueueToFile from '../ProcessingFrontEnd/queueToFile'
 import CopyQueue from './CopyQueue'
 import ExportQueue from './ExportQueue'
@@ -61,7 +62,7 @@ const Queue = (props) => {
         const res = await fetch(`https://infernovertigo.pythonanywhere.com/anime/music/val=${title}/opening=${opening}/year=${year}`)
         .then((response)=>response.json());
 
-        loadURL((obj)=>res[1]);
+        loadURL((obj)=>res[0]);
       }
       retaliate();
       setIsOpening(true);
@@ -71,7 +72,7 @@ const Queue = (props) => {
         const res = await fetch(`https://infernovertigo.pythonanywhere.com/anime/music/val=${title}/opening=${opening}/year=${year}`)
         .then((response)=>response.json());
 
-        loadURL((obj)=>res[1]);
+        loadURL((obj)=>res[0]);
       }
       retaliate();
       setIsOpening(false);
@@ -97,7 +98,7 @@ const Queue = (props) => {
     
     for(var index = 0; index < localStorage.length; index++){
       var obj = null
-      if(localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id"){
+      if(localStorage.key(index) == "dbVersion" || localStorage.key(index) == "reloader" || localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id" || localStorage.key(index) == "version" || localStorage.key(index) == "email" || localStorage.key(index) == "trigger"){
         continue;
       }else{
         obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
@@ -178,7 +179,7 @@ const Queue = (props) => {
     let newList = []
     for(var index = 0; index < localStorage.length; index++){
       var obj = null
-      if(localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id"){
+      if(localStorage.key(index) == "dbVersion" || localStorage.key(index) == "reloader" || localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id" || localStorage.key(index) == "version" || localStorage.key(index) == "email" || localStorage.key(index) == "trigger"){
         continue;
       }else{
         obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
@@ -201,7 +202,7 @@ const Queue = (props) => {
     let reser = []
     
     for(var index = 0; index < localStorage.length; index++){
-      if(localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id"){
+      if(localStorage.key(index) == "dbVersion" || localStorage.key(index) == "reloader" || localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id" || localStorage.key(index) == "version" || localStorage.key(index) == "email" || localStorage.key(index) == "trigger"){
         continue;
       }
       var obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
@@ -334,9 +335,9 @@ const Queue = (props) => {
         }
       </Modal>
 
-        <Header loggedIn={props.loggedIn} setLoggedIn={props.setloggedIn}/>
-        <Nav showSearch={true}/>
-        <a id="toBottom" href="#bottom">Scroll to bottom</a>
+        {/*<Header loggedIn={props.loggedIn} setLoggedIn={props.setloggedIn}/>
+        <Nav showSearch={true}/>*/}
+        <LinkV2 to="#bottom"><span id="toBottom">Scroll to bottom</span></LinkV2>
         <div className='filter_container'>
           <div id="queue_search_id">
             <label className="queue_search_label">Search:</label>
@@ -346,7 +347,7 @@ const Queue = (props) => {
                   return(<option key={obj.id} id={obj.id}>{obj.title}</option>)
                 })}
               </datalist>
-              <button id="queue_search_btn"><a href={`#${anchored}${inSearch}`}>Search</a></button>
+              <button id="queue_search_btn"><LinkV2 to={`#${anchored}${inSearch}`}>Search</LinkV2></button>
           </div>
 
           <div id="queue_filter_id">
@@ -386,7 +387,7 @@ const Queue = (props) => {
           
         </table>
       </div>
-      <a id="toTop" href="#top">Back to top</a>
+      <LinkV2 to="#top" ><span id="toTop">Back to Top</span></LinkV2>
       <footer id="bottom"></footer>
     </div>
   )

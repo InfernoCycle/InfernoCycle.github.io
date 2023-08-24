@@ -124,8 +124,8 @@ function ExportQueue(props) {
 
   return (
     <>
-      <Header loggedIn={props.loggedIn} setloggedIn={props.setloggedIn}/>
-      <Nav showSearch={true}/>
+      {/*<Header loggedIn={props.loggedIn} setloggedIn={props.setloggedIn}/>
+      <Nav showSearch={true}/>*/}
       <h1 style={{textAlign:"center", color:"white"}}>Anime Tree Exporter</h1>
 
       <div style={{textAlign:"center"}}>

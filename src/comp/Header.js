@@ -76,7 +76,7 @@ const Header = (props) => {
   function getModified(){
     let temp = [];
     for(let i = 0; i < localStorage.length; i++){
-      if(localStorage.key(i) == "salt" || localStorage.key(i) == "password" || localStorage.key(i) == "user" || localStorage.key(i) == "top_anime" || localStorage.key(i) == "First_Log" || localStorage.key(i) == "token" || localStorage.key(i) == "logged_in" || localStorage.key(i) == "user_id"){
+      if(localStorage.key(i) == "dbVersion" || localStorage.key(i) == "reloader" || localStorage.key(i) == "salt" || localStorage.key(i) == "password" || localStorage.key(i) == "user" || localStorage.key(i) == "top_anime" || localStorage.key(i) == "First_Log" || localStorage.key(i) == "token" || localStorage.key(i) == "logged_in" || localStorage.key(i) == "user_id" || localStorage.key(i) == "version" || localStorage.key(i) == "email" || localStorage.key(i) == "trigger"){
         //console.log(localStorage.key(i))
         continue;
       }else{
@@ -144,6 +144,8 @@ const Header = (props) => {
         "content-type":"application/json"
       }
     });
+
+    //console.log(await res2.json())
 
     let returnValue = await res2.json();
     //console.log(returnValue);

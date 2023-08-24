@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from 'react'
 import {FaTimes} from "react-icons/fa"
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 /*<td key={obj.id}  className="prgs_anime">
                 
                 </td>
@@ -12,7 +12,9 @@ const QueueHolder = (props) => {
     const [anchored, setAnchored] = useState("A");
     const [usedButton, setUsedButton] = useState(false);
     const [Progress, setProgress] = useState(0);
+    const scoresArray = [0,1,2,3,4,5,6,7,8,9,10];
     var temp = null;
+    const navigate = useNavigate()
 
     useEffect(()=>{
         setUpdate(props.inQueue);
@@ -89,7 +91,9 @@ const QueueHolder = (props) => {
     }
 
     const userRating = async(e, id) =>{
-        const data = prompt("Enter show score (0-10): ");
+        const data = e.target.options.selectedIndex
+
+        //const data = prompt("Enter show score (0-10): ");
         if(data > 10){
             alert("Cannot rate above 10");
             return;
@@ -108,7 +112,9 @@ const QueueHolder = (props) => {
         temp.rating = data;
         temp.modified = true;
         localStorage.setItem(id, JSON.stringify(temp));
-        e.target.textContent = Math.round(data);
+        //console.log(data)
+        //console.log(JSON.parse(localStorage.getItem(id)))
+        //e.target.textContent = Math.round(data);
     }
 
     const deleteItem = (e, id) =>{
@@ -164,6 +170,34 @@ const QueueHolder = (props) => {
         //console.log("rerended")
     }, [setAnchored, prgsCount])
 
+    async function get_anime_info(obj){
+        let type = null;
+    
+        if(obj.id){
+          type = obj.id;
+        }
+        else if(obj.mal_id){
+          type = obj.mal_id;
+        }
+        const res = await fetch("https://infernovertigo.pythonanywhere.com/anime/information", 
+        {
+            method:"POST",
+            body:JSON.stringify({"title":obj.title, "id":type}),
+         
+            headers:{
+                "Content-Type":"application/json"
+            }
+        }).then((res)=>{
+            return res.json();
+        })
+        //console.log(res);
+        //const entity = await res;
+    
+        //localStorage.setItem("tempSynopsis", entity["entity"]);
+        //console.log(obj)
+        navigate("/anime", {state:{jinx:obj, synopsis:res["entity"]}})
+      }
+
   return (
     <>
         {
@@ -179,17 +213,18 @@ const QueueHolder = (props) => {
                                 <img key={obj.id} src={obj.img_url} alt={obj.name} title={obj.name}/>
                             </td>
                             <td /*key={obj.id}*/ className="queue_name_synopsis">   
-                                <h3 key={obj.id}><Link to="/anime" state={{jinx:obj}}>{obj.title}</Link>{/*<a href={obj.url} target="_blank" rel="noreferrer">{obj.title}</a>*/}</h3>
+                                <h3 key={obj.id}><a className="titleClick" onClick={(e)=>get_anime_info(obj)} state={{jinx:obj}}>{obj.title}</a>{/*<a href={obj.url} target="_blank" rel="noreferrer">{obj.title}</a>*/}</h3>
                                 
                             </td>
                             <td /*key={obj.id}*/ className='score'>
-                                <p /*key={obj.id}*/><button onClick={(e)=>userRating(e, obj.id)} className='score-btn'>{obj.rating == '' || obj.rating == 0 ? "-" : obj.rating}</button></p>
+                                <p /*key={obj.id}*/>{/*<button onClick={(e)=>userRating(e, obj.id)} className='score-btn'>{obj.rating == '' || obj.rating == 0 ? "-" : obj.rating}</button>*/}
+                                <select key={obj.id} onChange={(e)=>userRating(e, obj.id)}>{scoresArray.map((value, idx)=>{if(value == obj.rating){return (<option selected={true} value={value}>{value}</option>)}else{return(<option value={value}>{value}</option>)}})}</select></p>
                             </td>
                             <td /*key={obj.id}*/ className="anime_type">
                                 <p /*key={obj.id}*/>{obj.type}</p>
                             </td>
                             <td /*key={obj.id}*/ className="prgs_anime">
-                                <p><button onClick={(e)=>prgsCount(e, obj.id, false, false)} className='episodeCount-btn'>{obj.watched == '' ? 0:obj.watched}</button>/{obj.episodes}</p>               
+                                <p><button onClick={(e)=>prgsCount(e, obj.id, false, false)} className='episodeCount-btn'>{obj.watched == '' ? 0:Number(obj.watched)}</button>/{obj.episodes}</p>               
                             </td>
                             {/*<td key={obj.id} className="cscore">
                                 <p key={obj.id}>{obj.avgScores}</p>       
