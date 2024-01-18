@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/static/css/main.876d2375.css",
-    "main.js": "/static/js/main.403adc0a.js",
+    "main.js": "/static/js/main.2f0bf967.js",
     "static/media/AutumnLeaves2.gif": "/static/media/AutumnLeaves2.50be9dfa5f4835dde914.gif",
     "static/media/Banned_Words_2022_05_05.txt": "/static/media/Banned_Words_2022_05_05.a1a78272143213df4a7f.txt",
     "index.html": "/index.html",
     "main.876d2375.css.map": "/static/css/main.876d2375.css.map",
-    "main.403adc0a.js.map": "/static/js/main.403adc0a.js.map"
+    "main.2f0bf967.js.map": "/static/js/main.2f0bf967.js.map"
   },
   "entrypoints": [
     "static/css/main.876d2375.css",
-    "static/js/main.403adc0a.js"
+    "static/js/main.2f0bf967.js"
   ]
 }
