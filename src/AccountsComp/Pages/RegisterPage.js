@@ -148,7 +148,7 @@ function RegisterPage(props) {
     setUsersQueue((obj)=>{
       let temp = [];
       for(let i = 0; i < localStorage.length; i++){
-        if(localStorage.key(i) == "salt" || localStorage.key(i) == "password" || localStorage.key(i) == "user" || localStorage.key(i) == "top_anime" || localStorage.key(i) == "First_Log" || localStorage.key(i) == "token" || localStorage.key(i) == "logged_in" || localStorage.key(i) == "user_id" || localStorage.key(i) == "version" || localStorage.key(i) == "email"){
+        if(localStorage.key(i) == "salt" || localStorage.key(i) == "password" || localStorage.key(i) == "user" || localStorage.key(i) == "top_anime" || localStorage.key(i) == "First_Log" || localStorage.key(i) == "token" || localStorage.key(i) == "logged_in" || localStorage.key(i) == "user_id" || localStorage.key(i) == "version" || localStorage.key(i) == "email" || localStorage.key(i) == "dbVersion" || localStorage.key(i) == "trigger"){
           //console.log(localStorage.key(i))
           continue;
         }else{
@@ -347,11 +347,11 @@ function RegisterPage(props) {
 
   async function submit(username, password, salt, mailPackage){
     if(userError || passError || passReError || mailError || username === undefined || password === undefined || salt === undefined){
-      console.log("userError: ", userError);
+      /*console.log("userError: ", userError);
       console.log("passError: ", passError);
       console.log("rePassError: ", passReError);
       console.log("emailError: ", mailError);
-      console.log("problem")
+      console.log("problem")*/
       return;
     }
 
@@ -429,6 +429,17 @@ function RegisterPage(props) {
       hash();
       sendRequest()
     }
+    else if(!res.newUser && !res.hash && !res.usable && !res.usableEmail){
+      form_err.textContent = "A Problem occurred Please try again later";
+      form_err.style.visibility = "visible";
+      loadIcon.style.visibility = "hidden";
+      return;
+    }
+    /*else if(!res.password){ for password correction if i want
+      form_err.textContent = "Password is invalid";
+      form_err.style.visibility = "visible";
+      loadIcon.style.visibility = "hidden";
+    }*/
     else if(!res.newUser){  
       form_err.textContent = "Username is already taken";
       form_err.style.visibility = "visible";
@@ -493,8 +504,7 @@ function RegisterPage(props) {
         //overlayClassName="Overlay"
       >
         <div>
-          <h1 className='register_final'>Note: Once you register you will no longer have 
-            access to the queue when logged out.</h1>
+          <h1 className='register_final'>Note: Once you register, your username will be displayed on the leaderboards page.</h1>
 
             <p className='register_final'>Do You Want To Continue?</p>
 

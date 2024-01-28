@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom';
+import moment from 'moment';
 
 const showLink = (e) =>{
   let parent = e.target.parentNode.parentNode;
@@ -20,6 +22,25 @@ const hideLink = (e) =>{
 
 const Buttons = (props) => {
   const navigate = useNavigate();
+
+  function single_double(day){if(day.toString().length == 1){return "0" + day.toString();}return day;}
+  function to_12_hour(time){
+    let time_prefix = "";
+    let hour = time.getHours();
+    if(hour >= 12){time_prefix = "P.M.";}else{time_prefix = "A.M.";}
+    if(hour > 12){hour = hour % 12;}
+    let minutes = single_double(time.getMinutes());
+
+    return`${hour}:${minutes} ${time_prefix}`;
+  }
+
+  function renderer(){
+    if(props.scratch){
+      return (<>{props.today==true?<p class="show_date_btn_p" style={{width:"227px", fontWeight:"bold", "color":"red", "textAlign":"center", "textDecoration":"line-through"}}>{to_12_hour(props.object.user_date)}</p>:<></>}</>);
+    }else{
+      return (<>{props.today==true?<p class="show_date_btn_p" style={{width:"227px", fontWeight:"bold", "color":"red", "textAlign":"center"}}>{to_12_hour(props.object.user_date)}</p>:<></>}</>);
+    }
+  }
 
   async function get_anime_info(obj){
     let type = null;
@@ -58,6 +79,7 @@ const Buttons = (props) => {
                       <p className="anime-title"><div className='anime-title-background'><p className="selectedTitle2">{props.object.title}</p></div></p>
                     </div>         
                   </div>
+                  {renderer()}
       </div>
   )
 }

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import $ from 'jquery';
@@ -13,11 +14,20 @@ const Nav = (props) => {
   const delay = 1500;
   const navigate = useNavigate();
   var FocusingOut = false;
-  const masterList = useContext(ContextHead)
+  const {masterList, db} = useContext(ContextHead)
 
   useEffect(()=>{
     async function main(){
       const results = await masterList
+      const search_res = document.getElementsByClassName("search_input");
+      //console.log(results);
+      if(results.length == 0){
+        search_res[0].disabled = true;
+        return;
+      }else{
+        search_res[0].disabled = false;
+      }
+      
       let replacement = {}
       /*masterAllAnime.onsuccess = (e2) =>{
         const results = e2.target.result
@@ -97,13 +107,12 @@ const Nav = (props) => {
             replacement[results[i]["japanese_name"]]=results[i]
           }
         }
-        setSearchList((obj)=>{
-          return replacement;
-        })
-        //console.log("complete")
+      setSearchList((obj)=>{
+        return replacement;
+      })
+      //console.log("complete")
     }
    main()
-      
   }, [masterList])
 
   function merge(left, right) {
@@ -562,15 +571,6 @@ const Nav = (props) => {
     //console.log(Object.keys(searchList));
   }
 
-  function adjustScroll(){
-    const list_holder = document.getElementsByClassName("result_list");
-    console.log(list_holder[0].offsetWidth);
-    console.log(list_holder[0].offsetHeight);
-
-    const list_holder2 = document.getElementsByClassName("search_results");
-    console.log(list_holder2[0].offsetWidth);
-  }
-
   function redirectLeaderboard(e){
     props.setRedirect("leaderboard");
     //console.log(props);
@@ -589,15 +589,6 @@ const Nav = (props) => {
     }
   }
 
-  function available(e){
-    if(masterList.length == 0){
-      alert("Website is setting up at the moment.");
-    }
-    else{
-      return;
-    }
-  }
-
   return (
     <div className='nav-container'>
     <nav className='ViewQueue'>
@@ -606,7 +597,7 @@ const Nav = (props) => {
           {/*JSON.parse(localStorage.getItem("hidden"))  || JSON.parse(localStorage.getItem("logged_in"))? 
           <Link className="Link" to="/queue"><button>The Queue</button></Link> 
           : <></>*/}
-          <a className="Link" onClick={(e)=>redirectLeaderboard(e)}><button>Leaderboard</button></a>
+          <a className="Link" onClick={(e)=>redirectLeaderboard(e)}><button style={{color:"red"}}>Maintanence</button></a>
           {/*JSON.parse(localStorage.getItem("hidden")) || JSON.parse(localStorage.getItem("logged_in"))?
           <Link className="Link" to="/stats"><button>Stats</button></Link>
           : <></>*/}
@@ -617,7 +608,6 @@ const Nav = (props) => {
               <form onSubmit={props.handleSearch}>
                 <input
                 onKeyUp={e=>search(e)}
-                onClick={e=>available(e)}
                 className='search_input'
                 value={props.search} 
                 //onChange={e=>search_results(e)}

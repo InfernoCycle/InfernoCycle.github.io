@@ -25,6 +25,67 @@ export default function About(props) {
       </p>
       <hr></hr>
       <h2 className="updatesListHeader">Changes</h2>
+      {/* Place updatesList down below */}
+      <ul className='updatesList'>
+      <li> (1/24/2024)
+        <ul>
+          <li>Leaderboard Page Has Been Removed and will be turned into an unspecified new page.</li>
+          <li>Future Plans: new loading times and setup for anime pages.</li>
+          <li>Future Plans: Settings Menu Coming Soon.</li>
+          <li>Future Plans: Manga Support Later.</li>
+          <li>Improvements Coming Soon: Better Loading Times For User List, adding where to watch links for each anime if applicable, improving anime pages as they are a bit blend, and other small improvements throughout the year.</li>
+        </ul>
+      </li>
+      <li> (1/22/2024)
+        <ul>
+          <li>Improved the "New Episodes Today" section to allow users to navigate multiple days.</li>
+        </ul>
+      </li>
+      <li> (1/18/2024)
+        <ul>
+          <li>Problem with logging out resolved</li>
+        </ul>
+      </li>
+      <li> (10/16/2023)
+          <ul>
+            <li>Fixed imports where after finishing, user's list didn't change afterwards.</li>
+          </ul>
+        </li>
+        <li> (10/15/2023)
+          <ul>
+            <li>Fixed registering an account as it caused users to load forever</li>
+            <li>Fixed imports where it had an infinite loading screen.</li>
+          </ul>
+        </li>
+        <li> (9/30/2023)
+          <ul>
+            <li>Added Search Option in Leaderboards to view user's list</li>
+            <li>Removed New Episode Section to be revised for a more imporved version</li>
+            <li>Slightly increased load times on leaderboards</li>
+          </ul>
+        </li>
+      </ul>
+      <ul className='updatesList'>
+        <li> (1/7/2023)
+          <ul>
+            <li>Added export button above user's which will download a formatted xml file that 
+              user's can use to add their anime info on this site to MyAnimeList</li>
+            <li>Fixed search bar issue where it didn't go to where a users show was.</li>
+            <li>Increased search time performance.</li>
+            <li>Users queues now have option to watch shows opening or ending (if available).</li>
+            <li>Dedicated buttons for (1) adding episodes as watched, and (2) adding a show to currently watching.</li>
+          </ul>
+        </li>
+      </ul>
+      <ul className='updatesList'>
+        <li>(9/15/2023)
+          <ul>
+            <li>Can Now Import My Anime List XML files to your queue. (No Error Checking)</li>
+            <li>User's List now dynamically updates across all platforms. (reloading page now shows changes)</li>
+            <li>Due to mobile problems. Hovering over your username for dropdown has been removed. Now, user's have to click their name for viewable dropdown.</li>
+          </ul>
+        </li>
+      </ul>
       <ul className='updatesList'>
         <li>(8/4/2023)
           <ul>

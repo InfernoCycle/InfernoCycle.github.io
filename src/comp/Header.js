@@ -76,10 +76,17 @@ const Header = (props) => {
   function getModified(){
     let temp = [];
     for(let i = 0; i < localStorage.length; i++){
-      if(localStorage.key(i) == "dbVersion" || localStorage.key(i) == "reloader" || localStorage.key(i) == "salt" || localStorage.key(i) == "password" || localStorage.key(i) == "user" || localStorage.key(i) == "top_anime" || localStorage.key(i) == "First_Log" || localStorage.key(i) == "token" || localStorage.key(i) == "logged_in" || localStorage.key(i) == "user_id" || localStorage.key(i) == "version" || localStorage.key(i) == "email" || localStorage.key(i) == "trigger"){
+      /*if(localStorage.key(i) == "dbVersion" || localStorage.key(i) == "reloader" || localStorage.key(i) == "salt" || localStorage.key(i) == "password" || localStorage.key(i) == "user" || localStorage.key(i) == "top_anime" || localStorage.key(i) == "First_Log" || localStorage.key(i) == "token" || localStorage.key(i) == "logged_in" || localStorage.key(i) == "user_id" || localStorage.key(i) == "version" || localStorage.key(i) == "email" || localStorage.key(i) == "trigger" || localStorage.key(i) == "debug"){
         //console.log(localStorage.key(i))
         continue;
       }else{
+        try{
+          temp.push(localStorage.getItem(localStorage.key(i)));
+        }catch{
+          continue;
+        }
+      }*/
+      if(!Number.isNaN(Number(localStorage.key(i)))){
         try{
           temp.push(localStorage.getItem(localStorage.key(i)));
         }catch{
@@ -144,7 +151,6 @@ const Header = (props) => {
         "content-type":"application/json"
       }
     });
-
     //console.log(await res2.json())
 
     let returnValue = await res2.json();
@@ -169,8 +175,8 @@ const Header = (props) => {
     localStorage.setItem("logged_in", JSON.stringify(false));
     localStorage.setItem("top_anime", top_anime);
     localStorage.setItem("hidden", JSON.stringify(true));
-    console.log(await res.json());
-
+    //console.log(await res.json());
+    //console.log(modifiedQueue);
     //return to home page logged out bruh
     window.location.replace("/");
     //return;
@@ -185,7 +191,7 @@ const Header = (props) => {
           <div className="userImgContainer">
             <h3 className="user_name_header">Welcome: </h3>
             <div className="user_area">
-              <span onPointerLeave={(e)=>show(e, "hide")} onPointerOver={(e)=>show(e, "appear")} className='userName'>
+              <span onPointerLeave={(e)=>show(e, "hide")} onClick={(e)=>show(e, "appear")} className='userName'>
                 {localStorage.getItem("user")}
               </span>
               <div onPointerLeave={(e)=>show(e, "hide")} onPointerOver={(e)=>show(e, "appear")} className='dropdown'> 

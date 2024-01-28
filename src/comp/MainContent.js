@@ -4,6 +4,7 @@ import Buttons from './Buttons'
 import { Link, useNavigate } from 'react-router-dom';
 import Nav from './Nav';
 import axios from 'axios';
+import $ from 'jquery';
 
 axios.defaults.xsrfCookieName = "csrftoken";
 axios.defaults.xsrfHeaderName = "x-csrftoken";
@@ -12,6 +13,8 @@ axios.defaults.withCredentials = true;
 const MainContent = (props) => {
   const [Season, updateseason] = useState("Fall");
   const [Year, updateYear] = useState(new Date().getFullYear());
+  const [date, setDate] = useState(new Date().getDay());
+  const [froze_position, Freeze] = useState(false);
   //const [results, updateResults] = useState(10);
 
   //const [SeasonLabel, updateLabel] = useState(`Fall ${Year}`);
@@ -22,8 +25,53 @@ const MainContent = (props) => {
   const [fall, setFall] = useState(false);
   const navigate = useNavigate();
 
+  function is_behind(obj){
+    let above = false;
+    if(new Date().getTime() > obj.time_difference.getTime()){above=true;}
+    return above;
+  }
+
+  function Renderer(){
+    if(date == 0){
+      return <>{props.anime_by_day.sunday.map((obj, idx)=>{
+      return(<Buttons key={obj.id} object={obj} today={true} scratch={is_behind(obj)}/>)})}
+      </>
+    }
+    if(date == 1){
+      return <>{props.anime_by_day.monday.map((obj, idx)=>{
+      return(<Buttons key={obj.id} object={obj} today={true} scratch={is_behind(obj)}/>)})}
+      </>
+    }
+    if(date == 2){
+      return <>{props.anime_by_day.tuesday.map((obj, idx)=>{
+      return(<Buttons key={obj.id} object={obj} today={true} scratch={is_behind(obj)}/>)})}
+      </>
+    }
+    if(date == 3){
+      return <>{props.anime_by_day.wednesday.map((obj, idx)=>{
+      return(<Buttons key={obj.id} object={obj} today={true} scratch={is_behind(obj)}/>)})}
+      </>
+    }
+    if(date == 4){
+      return <>{props.anime_by_day.thursday.map((obj, idx)=>{
+      return(<Buttons key={obj.id} object={obj} today={true} scratch={is_behind(obj)}/>)})}
+      </>
+    }
+    if(date == 5){
+      return <>{props.anime_by_day.friday.map((obj, idx)=>{
+      return(<Buttons key={obj.id} object={obj} today={true} scratch={is_behind(obj)}/>)})}
+      </>
+    }
+    if(date == 6){
+      return <>{props.anime_by_day.saturday.map((obj, idx)=>{
+      return(<Buttons key={obj.id} object={obj} today={true} scratch={is_behind(obj)}/>)})}
+      </>
+    }
+  }
+
   useEffect(()=>{
-      if((new Date().getMonth() >= 11 && new Date().getMonth <=2)){
+    //console.log(new Date().getMonth());
+      if(new Date().getMonth() <= 2){
           //console.log("it's winter")
           updateseason((obj)=>{
               setWinter(true);
@@ -33,7 +81,7 @@ const MainContent = (props) => {
               return "Winter";
           })
       }
-      if((new Date().getMonth() >= 2 && new Date().getMonth() <= 5)){
+      if(new Date().getMonth() > 2 && new Date().getMonth() <= 5){
           //console.log("it's spring")
           updateseason((obj)=>{
               setSpring(true);
@@ -43,7 +91,7 @@ const MainContent = (props) => {
               return "Spring";
           })
       }
-      if((new Date().getMonth() >= 6 && new Date().getMonth() <= 8)){
+      if(new Date().getMonth() >= 6 && new Date().getMonth() <= 8){
           //console.log("it's summer")
           updateseason((obj)=>{
               setSummer(true);
@@ -53,7 +101,7 @@ const MainContent = (props) => {
               return "Summer"
           })
       }
-      if((new Date().getMonth() >= 9 && new Date().getMonth() <= 11)){
+      if(new Date().getMonth() >= 9 && new Date().getMonth() <= 11){
           //console.log("it's fall")
           updateseason((obj)=>{
               setFall(true);
@@ -66,9 +114,14 @@ const MainContent = (props) => {
   }, [])
 
   useEffect(()=>{
+    //console.log(props.showContent)
     //localStorage.clear()
     //console.log("re-render")
   }, [props])
+
+  /*useEffect(()=>{
+    console.log(props.todayAnime)
+  },[])*/
 
   //const navigate = useNavigate();
 
@@ -92,21 +145,101 @@ const MainContent = (props) => {
     navigate("/anime", {state:{jinx:obj, synopsis:entity["entity"]}})
   }
 
+  /*useEffect(()=>{
+    console.log(props.todayAnime);
+  }, [props.todayAnime])*/
+  useEffect(()=>{
+    if(!froze_position){
+      let days = document.getElementById("days");
+      if(days){
+        let childs = days.childNodes;
+        let user_day = new Date().getDay();
+        for(let i = 0; i < days.childNodes.length; i++){
+          if(i = user_day){
+            childs[i].textContent = "Today";
+            childs[i].style.backgroundColor = "gray";
+            break;
+          }
+        }
+        Freeze(true);
+      }
+      
+    }
+    
+    $("#days>button").on("click",function(e){
+      const days = document.getElementById("days").childNodes;
+
+      for(let i = 0; i < days.length; i++){
+        if(days[i].style.backgroundColor){
+          days[i].style.backgroundColor = "";
+        }
+      }
+
+      if(!e.target.style.backgroundColor){
+        e.target.style.backgroundColor = "gray";
+      }
+
+      if(e.target.innerText == "S"){
+        setDate((obj)=>{
+          return 0;
+        })
+      }
+      if(e.target.innerText == "M"){
+         setDate((obj)=>{
+          return 1;
+        })
+      }
+      if(e.target.innerText == "T"){
+        setDate((obj)=>{
+          return 2;
+        })
+      }
+      if(e.target.innerText == "W"){
+         setDate((obj)=>{
+          return 3;
+        })
+      }
+      if(e.target.innerText == "Th"){
+         setDate((obj)=>{
+          return 4;
+        })
+      }
+      if(e.target.innerText == "F"){
+         setDate((obj)=>{
+          return 5;
+        })
+      }
+      if(e.target.innerText == "Sa"){
+         setDate((obj)=>{
+          return 6;
+        })
+      }
+      if(e.target.innerText == "Today"){
+        setDate((obj)=>{
+          return new Date().getDay();
+        })
+      }
+    });
+  })
+
   return (
     <>
       {/*<Nav showSearch={true} animeList={props.animeList} setSearch={props.setSearch} search={props.search} handleSearch={props.handleSearch} topAnime={props.topAnime}/>*/}
       {props.showContent == false ? <div className='container'>
           <div className='side'>
             <h2 className='top-anime-title'>New Episodes Today</h2>
-            <div id="top-anime-container">
-              {
-                props.todayAnime.map((obj, idx)=>{
-                  return(
-                    <Buttons key={obj.mal_id} object={obj}/>
-                  )
-                })
-              }
-            </div>
+              <nav id="days">
+                <button>S</button>
+                <button>M</button>
+                <button>T</button>
+                <button>W</button>
+                <button>Th</button>
+                <button>F</button>
+                <button>Sa</button>
+              </nav>
+            {true ?<div id="top-anime-container">
+              {<Renderer/>}
+            </div>:<h1 style={{"textAlign":"center", "color":"orange"}}>Temporarily revising this section</h1>}
             <h2 className='top-anime-title'>{Season} {Year} Anime</h2>
             <div id="top-anime-container">
               {props.seasonAnime.slice(0,10).map((obj, idx)=>{

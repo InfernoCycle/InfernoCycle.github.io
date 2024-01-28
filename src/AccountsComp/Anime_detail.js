@@ -35,6 +35,19 @@ const Animedetail = (props) =>{
     <Nav showSearch={true}/>*/}
     <h1 className='detail_headers'>{location.state.jinx.title}</h1>
     <div id="inner_detail_cont">
+    
+    {true?<></>:<div id="anime_stats_container">
+      <table>
+        <thead>
+          <th>
+            <td>Rank:</td>
+            <td>Watching:</td>
+            <td>Score:</td>
+          </th>
+        </thead>
+      </table>
+    </div>}
+
       <div id="img_cont">
         <img src={location.state.jinx.img_url} />
       </div>

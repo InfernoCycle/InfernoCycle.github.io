@@ -1,7 +1,7 @@
 import React from 'react'
 import Header from './Header'
 import Nav from './Nav'
-import { useEffect, useState} from 'react'
+import { useEffect, useState, useContext} from 'react'
 import QueueHolder from './QueueHolder'
 import {FaFilter} from "react-icons/fa"
 import Modal from "react-modal";
@@ -10,12 +10,15 @@ import { HashLink as LinkV2 } from 'react-router-hash-link';
 import QueueToFile from '../ProcessingFrontEnd/queueToFile'
 import CopyQueue from './CopyQueue'
 import ExportQueue from './ExportQueue'
+import { ContextHead } from '../App'
 
 const Timeout = (time) => {
   let controller = new AbortController();
   setTimeout(() => controller.abort(), time * 1000);
   return controller;
 };
+
+const baseURL = "https://infernovertigo.pythonanywhere.com";
 
 // Make sure to bind modal to your appElement (https://reactcommunity.org/react-modal/accessibility/)
 const customStyles = {
@@ -39,6 +42,7 @@ const customStyles = {
 
 //OPERATION MOVE MY JUNK 
 const Queue = (props) => {
+  const {queueLoaded, setQueueLoaded} = useContext(ContextHead);
   const [inQueue, setinQueue] = useState([]);
   const [unchange, setUnchange] = useState([]);
   const [originalQueue, setOriginal] = useState([]);
@@ -90,15 +94,64 @@ const Queue = (props) => {
   }
 
   const getAnime = async(id)=>{
-    /*const res1 = await fetch("http://127.0.0.1:8000/anime/status=true/", {
-      signal:Timeout(10).signal
-    })
-    .then((res)=>res.json());*/
-    let res1 = []
-    
+    if(!queueLoaded){
+      //console.log("Inside ran");
+      const res = await fetch(baseURL+"/accounts/get_queue", {
+        method:"POST",
+        body:JSON.stringify({
+          user:localStorage.getItem("user"),
+          password:localStorage.getItem("password"),
+          salt:localStorage.getItem("salt")
+        }),
+        headers:{
+          "Content-Type":"application/json",
+          "Accept":"application/json"
+        }
+      })
+      .then((res)=>res.json());
+  
+      let resClean = res["Data"];
+      //console.log(resClean);
+      for(let b = 0; b < resClean.length; b++){
+        localStorage.setItem(resClean[b].id, JSON.stringify(resClean[b]));
+      }
+
+      let res1 = [];
+      for(var index = 0; index < localStorage.length; index++){
+        var obj = null
+        /*if(localStorage.key(index) == "dbVersion" || localStorage.key(index) == "reloader" || localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id" || localStorage.key(index) == "version" || localStorage.key(index) == "email" || localStorage.key(index) == "trigger"){
+          continue;
+        }else{
+          obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
+          //console.log(obj)
+          if(obj.status === true){
+            res1.push(obj);
+          }
+        }*/
+        if(!Number.isNaN(Number(localStorage.key(index)))){
+          obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
+          //console.log(obj)
+          if(obj.status === true){
+            res1.push(obj);
+          }
+        }
+      }
+      //console.log(res);
+      //return;
+      //console.log(res1.slice(0,10));
+      setinQueue([...res1]);
+      setUnchange([...res1]);
+      setOriginal([...res1]);
+      //props.setInQueue([...res1]);
+      setQueueLoaded(true);
+      return;
+    }
+
+    //console.log("Outside ran");
+    let res1 = [];
     for(var index = 0; index < localStorage.length; index++){
       var obj = null
-      if(localStorage.key(index) == "dbVersion" || localStorage.key(index) == "reloader" || localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id" || localStorage.key(index) == "version" || localStorage.key(index) == "email" || localStorage.key(index) == "trigger"){
+      /*if(localStorage.key(index) == "dbVersion" || localStorage.key(index) == "reloader" || localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id" || localStorage.key(index) == "version" || localStorage.key(index) == "email" || localStorage.key(index) == "trigger"){
         continue;
       }else{
         obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
@@ -106,13 +159,21 @@ const Queue = (props) => {
         if(obj.status === true){
           res1.push(obj);
         }
+      }*/
+      if(!Number.isNaN(Number(localStorage.key(index)))){
+        obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
+        //console.log(obj)
+        if(obj.status === true){
+          res1.push(obj);
+        }
       }
     }
-    //console.log(res1);
+    //console.log(res1.slice(0,10));
     setinQueue([...res1]);
     setUnchange([...res1]);
     setOriginal([...res1]);
-    props.setInQueue([...res1]);
+    //props.setInQueue([...res1]);
+    return;
   }
 
   //ordering credit to these people: "https://www.scaler.com/topics/javascript-sort-an-array-of-objects/"
@@ -122,7 +183,7 @@ const Queue = (props) => {
     var stuff = temp.sort((a, b)=>
       (a.title > b.title) ? 1 : (a.title < b.title) ? -1 : 0
     );
-    var nameOnly = temp.map((obj)=>obj.title);
+    //var nameOnly = temp.map((obj)=>obj.title);
     //quickSort(nameOnly, 0, temp.length-1, "asc");
     //setinQueue(()=>[...temp]);
     setinQueue(()=>[...stuff])
@@ -145,7 +206,7 @@ const Queue = (props) => {
     setinQueue(()=>[...res])*/
     //console.log(originalQueue)
     //await putBackOriginal();
-    setinQueue(()=>originalQueue);
+    setinQueue(()=>[...originalQueue]);
   }
 
   const main = (option) =>{
@@ -179,9 +240,16 @@ const Queue = (props) => {
     let newList = []
     for(var index = 0; index < localStorage.length; index++){
       var obj = null
-      if(localStorage.key(index) == "dbVersion" || localStorage.key(index) == "reloader" || localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id" || localStorage.key(index) == "version" || localStorage.key(index) == "email" || localStorage.key(index) == "trigger"){
+      /*if(localStorage.key(index) == "dbVersion" || localStorage.key(index) == "reloader" || localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id" || localStorage.key(index) == "version" || localStorage.key(index) == "email" || localStorage.key(index) == "trigger"){
         continue;
       }else{
+        obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
+        //console.log(obj)
+        if(obj.status === true){
+          newList.push(obj);
+        }
+      }*/
+      if(!Number.isNaN(Number(localStorage.key(index)))){
         obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
         //console.log(obj)
         if(obj.status === true){
@@ -202,13 +270,20 @@ const Queue = (props) => {
     let reser = []
     
     for(var index = 0; index < localStorage.length; index++){
-      if(localStorage.key(index) == "dbVersion" || localStorage.key(index) == "reloader" || localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id" || localStorage.key(index) == "version" || localStorage.key(index) == "email" || localStorage.key(index) == "trigger"){
+      /*if(localStorage.key(index) == "dbVersion" || localStorage.key(index) == "reloader" || localStorage.key(index) == "token" || localStorage.key(index) == "First_Log" || localStorage.key(index) == "top_anime" || localStorage.key(index) == "salt"|| localStorage.key(index) == "password"|| localStorage.key(index) == "user" || localStorage.key(index) == "logged_in" || localStorage.key(index) == "user_id" || localStorage.key(index) == "version" || localStorage.key(index) == "email" || localStorage.key(index) == "trigger"){
         continue;
       }
       var obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
       //console.log(obj)
       if(obj.watching === true){
         reser.push(obj);
+      }*/
+      if(!Number.isNaN(Number(localStorage.key(index)))){
+        var obj = JSON.parse(localStorage.getItem(localStorage.key(index)))
+      //console.log(obj)
+        if(obj.watching === true){
+          reser.push(obj);
+        }
       }
     }
 
@@ -364,7 +439,7 @@ const Queue = (props) => {
             <button onClick={(e)=>main("")} className="QueueOptionBtns">All Anime</button>
             <button onClick={(e)=>main("Watching Now")} className="QueueOptionBtns">Watching Now</button>
             {/*<Link to="/mal_queue"><button disabled={true} className="QueueOptionBtns">Transfer From MAL</button></Link>*/}
-            {<Link id="exportButton" to="/mal_queue_in" state={inQueue}><button className="QueueOptionBtns">Export Queue</button></Link>}
+            {<Link id="exportButton" to="/mal_queue_in" state={inQueue}><button className="QueueOptionBtns">Import/Export Queue</button></Link>}
           </nav>
         </div>
       <div className='table-container'>
@@ -382,7 +457,14 @@ const Queue = (props) => {
                 <td colSpan={1} className='member_header'>Members</td>*/}
                 <td className='dlt_header'></td>
               </tr>
-          <QueueHolder active={test} setInQueue={setinQueue} inQueue={inQueue} animeList={props.animeList} click={openModal}/>
+          {queueLoaded ? 
+            <QueueHolder active={test} status={true} setInQueue={setinQueue} inQueue={inQueue} animeList={props.animeList} click={openModal}/>
+            : 
+            <div style={{"textAlign":"center", "marginTop":"50px"}}>
+              <div class="loader"></div>
+              <span id="loading_id">Loading</span>
+            </div>
+          }
           </tbody>
           
         </table>

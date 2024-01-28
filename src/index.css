@@ -13,7 +13,8 @@ body {
   font-family:'Times New Roman', Times, serif;
   font-size:20px;
   color:darkgray;
-  background-image:url("https://media.giphy.com/media/ovWn8N8TVg8hi/giphy.gif");
+  /*background-image:url("https://media.giphy.com/media/ovWn8N8TVg8hi/giphy.gif");*/
+  background-image:url("../res/WinterBreeze.gif");
   background-repeat:no-repeat;
   background-size:cover;
   width:80%;
@@ -21,12 +22,13 @@ body {
 }
 .header-title h1{
   text-shadow: 1px 1px black;
-  color:darkred;
+  color:purple;
   font-size: 60px;
   padding:10px;
   margin-top:0px;
 }
 .title_tree{
+  /*color:green;*/
   color:green;
 }
 
@@ -51,57 +53,8 @@ a:visited{
   display:grid;
   grid-template-columns: 90%;
   width:80%;
-  margin-left:20%;
+  margin-left:10%;
   justify-content: center;
-}
-
-@media (min-width: 999px){
-  .anime-list{
-    display:grid;
-    grid-template-columns: repeat(3, 1fr);
-  }
-  #top-anime-container{
-    display:grid;
-    grid-template-columns: repeat(3, 30%);
-    width:90%;
-    margin-left:10%;
-  }
-}
-
-@media (min-width: 650px) and (max-width:998px) {
-  .anime-list{
-    display:grid;
-    grid-template-columns: repeat(2, 1fr);
-  }
-  #top-anime-container{
-    display:grid;
-    grid-template-columns: 45% 45%;
-    width:90%;
-    margin-left:10%;
-  }
-}
-
-@media (max-width: 460px){
-  .anime-list{
-    display:grid;
-    grid-template-columns: repeat(3, 1fr);
-  }
-  #top-anime-container{
-    display:grid;
-    grid-template-columns: 90%;
-    width:80%;
-    margin-left:10%;
-    justify-content: center;
-  }
-}
-
-.top-anime-title{
-  text-align: center;
-}
-
-h2{
-  font-size: 30px;
-  color: white;
 }
 
 button{
@@ -123,19 +76,12 @@ button:hover{
 
 .btn-container{
   margin-bottom: 10px;
+  width:100%;
 }
 
 .emptyExtraContent{
   width:227px;
   margin-bottom:50px;
-}
-
-.viewMore{
-  margin-top:50%;
-  position:relative;
-  font-size:40px;
-  text-align: center;
-  color:silver;
 }
 
 .topAnimePic-container{
@@ -147,6 +93,140 @@ button:hover{
 
 .topAnimePic{
   cursor:pointer;
+}
+
+@media (min-width: 1185px){
+  .anime-list{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  #top-anime-container{
+    display:grid;
+    grid-template-columns: repeat(3, 30%);
+    width:90%;
+    margin-left:10%;
+  }
+  #days{
+    display:flex;
+    width:80%;
+    margin-left:10%;
+    text-align: center;
+    background-color:black;
+    margin-bottom:20px;
+  }
+  #days>button{
+    cursor:pointer;
+    padding:10px;
+    border:1px solid black;
+    flex-grow:1;
+    font-weight: bold;
+    text-align: center;
+  }
+  #days>button:hover{
+    background-color: gray;
+  }
+}
+
+@media (min-width: 700px) and (max-width:1184px) {
+  .anime-list{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  #top-anime-container{
+    display:grid;
+    grid-template-columns: 45% 45%;
+    width:90%;
+    margin-left:10%;
+  }
+  #days{
+    display:flex;
+    width:80%;
+    margin-left:10%;
+    text-align: center;
+    background-color:black;
+    margin-bottom:20px;
+  }
+  #days>button{
+    cursor:pointer;
+    padding:10px;
+    border:1px solid black;
+    flex-grow:1;
+    font-weight: bold;
+    text-align: center;
+  }
+  #days>button:hover{
+    background-color: gray;
+  }
+}
+
+@media (min-width: 281px) and (max-width: 699px){
+  .anime-list{
+    display:grid;
+    grid-template-columns: repeat(1, 1fr);
+  }
+  #top-anime-container{
+    display:grid;
+    grid-template-columns: 90%;
+    width:80%;
+    justify-items: center;
+  }
+  #days{
+    display:flex;
+    width:80%;
+    margin-left:10%;
+    text-align: center;
+    background-color:black;
+    margin-bottom:20px;
+  }
+  #days>button{
+    cursor:pointer;
+    padding:10px;
+    border:1px solid black;
+    flex-grow:1;
+    font-weight: bold;
+    text-align: center;
+  }
+  #days>button:hover{
+    background-color: gray;
+  }
+
+  .btn-container{
+    margin-bottom: 10px;
+    width:227px;
+  }
+  
+  .emptyExtraContent{
+    width:227px;
+    margin-bottom:50px;
+  }
+  
+  .topAnimePic-container{
+    height:321px;
+    width:227px;
+    background-color: red;
+    position: relative;
+  }
+  
+  .topAnimePic{
+    cursor:pointer;
+  }
+}
+
+.top-anime-title{
+  text-align: center;
+}
+
+h2{
+  font-size: 30px;
+  color: white;
+}
+
+.viewMore{
+  margin-top:50%;
+  position:relative;
+  font-size:40px;
+  text-align: center;
+  color:silver;
 }
 
 .add-btn{
@@ -1019,6 +1099,9 @@ span#header_seasonal_result{
   margin:0px;
   font-size: 19px;
 }
+.userName:hover{
+  color:yellow;
+}
 
 .dropdown{
   font-weight: normal;
@@ -1134,6 +1217,14 @@ option{
   display:block;
 }
 
+#anime_stats_container{
+  background-color: purple;
+} 
+#anime_stats_container>table{
+  background-color: orange;
+  margin:0px auto 0px auto;
+}
+
 .detail_headers{
   color:white;
 }
@@ -1241,6 +1332,12 @@ option{
 }
 
 /*leaderboard*/
+#users_search_div{
+  margin-left:10%;
+  margin-right:10%;
+  margin-top:50px;
+  text-align: center;
+}
 #table_cont{
   width:80%;
   margin-left:10%;
@@ -1407,6 +1504,18 @@ option{
 }
 
 /* extra */
+#confirmImport{
+  display:none;
+}
+
+#successfulImport{
+  display:none;
+}
+
+#importerLoader{
+  display:none;
+}
+
 #loginLoader{
   width:30px;
   height:30px;

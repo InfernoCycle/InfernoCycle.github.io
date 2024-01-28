@@ -17,10 +17,15 @@ import ProtectRoute from "./ProcessingFrontEnd/protectRoute";
 import Animedetail from "./AccountsComp/Anime_detail";
 import PasswordRecover from "./AccountsComp/Pages/PasswordRecover"
 import Redirecting from "./comp/redirecting";
+import View from "./User_Links/user_views/view";
 import Cookies from "universal-cookie";
 import axios from "axios";
 import {Dexie} from 'dexie';
+import moment from 'moment';
+import months from 'moment-timezone';
 import {useLiveQuery} from 'dexie-react-hooks'
+
+//DexieB Docs: https://dexie.org/docs/Collection/Collection
 
 export const db = new Dexie('myDatabase');
 db.version(1).stores({
@@ -95,6 +100,8 @@ function App() {
   //const [status, setStatus] = useState(()=>[]);
   const [status, setStatus] = useState(() => [])
 
+  const [anime_by_day, setAnime] = useState({today:[], monday:[], tuesday:[], wednesday:[], thursday:[], friday:[], saturday:[], sunday:[]});
+
   const [seasonAnime, updateSeason] = useState([]);
   //const [Season, updateseason] = useState("Fall");
   //const [Year, updateYear] = useState(new Date().getFullYear());
@@ -109,6 +116,7 @@ function App() {
   const [redirectTo, setRedirect] = useState("");
   const [contentStatus, setcontentStatus] = useState(true);
 
+  const [isqueueLoaded, setQueueLoaded] = useState(false);
   var limiter = false;
   //var db = null;
 
@@ -171,12 +179,15 @@ function App() {
       //console.log(animeSize);
       //console.log(seasonSize);
       const results = await db.anime.where("airing").equals(1).toArray();
-      const seasonsMe = await db.season.where("id").above(0).toArray();
+      const seasonsMe = await db.season.where("airing").above(0).toArray();
       setSeasonalAnime((obj)=>{
         return [...seasonsMe]
       })
 
-      const time = new Date();
+      //console.log(results)
+      //console.log(seasonsMe);
+
+      /*const time = new Date();
       const DOW = time.getDay();
       const local = new Date();
       const localParse = Date.parse(`${local.getFullYear()}-0${local.getMonth()}-${local.getDate()}T23:59:00.000+09:00`);
@@ -197,15 +208,18 @@ function App() {
       let nextYear = japanYear;
       if(nextMonth == 12 & japanDOM == days_in_month){nextMonth = 1;nextYear+=1;}
       if(nextMonth < 10){nextMonth = "0" + nextMonth.toString();}
-      const japanNextDay = new Date(nextYear,nextMonth,nextDay);
-      
-      //if(limiter == false){
+      const japanNextDay = new Date(nextYear,nextMonth,nextDay);*/
+
+      if(limiter == false){
         //limiter = true;
-        for(let i = 0; i < results.length; i++){setTodayList(results[i], results[i]["broadcast"], time, japanese_time, days_month, japanNextDay);}
-      //}
+        for(let i = 0; i < results.length; i++){
+          setTodayList(results[i], results[i]["broadcast"], i, results[i]["start_date"]);
+        }
+      }
       
 
       setcontentStatus(()=>{return false;})
+      //console.log("Finished the finish task");
       localStorage.setItem("version", versionNumber);
   }
 
@@ -246,6 +260,7 @@ function App() {
           }
         })
 
+        //if count is 0 then run gateRequest
         const season = await db.season.where("id").above(0).count(async function(count){return count}).then(async(res)=>{
           seasonSize = res;
           if(res == 0){gateRequestSeason = true;}
@@ -255,7 +270,8 @@ function App() {
               return [...await db.season.where("id").equals(1).toArray()];
             })*/
             //console.log("operate finish");
-            finish();
+            //finish();
+            return;
             //setcontentStatus(()=>{return false})
           }
         })
@@ -286,6 +302,7 @@ function App() {
 
       if(gateRequestAnime == true || gateRequestSeason == true || JSON.parse(curVer) != versionNumber){
         //console.log("running request")     
+        setcontentStatus(()=>{return true;})
         try{
           req2 = await client.get(`/anime=info/season=${SeasonString}`,
           {
@@ -302,7 +319,12 @@ function App() {
             //console.log("zero date_obj for no reason")
           }
 
+          let arr = [];
+          let count = 0;
           await db.transaction("rw", db.anime, db.season, async function(){
+            //console.log("modifying airing to all 0's");
+            await db.season.where("airing").above(0).modify({airing: 0});
+            
             for(const key in MainObject){
               if(MainObject[key]["airing"] == true){
                 MainObject[key]["airing"] = 1;
@@ -310,6 +332,8 @@ function App() {
               else if(MainObject[key]["airing"] == false){
                 MainObject[key]["airing"] = 0;
               }
+
+              arr.push(MainObject[key]);
               await db.anime.put(MainObject[key], key)
             }
 
@@ -325,6 +349,8 @@ function App() {
             }
           }).then(async()=>{
             //console.log("Transaction completed")
+            //console.log(seasonObject);
+            setMasterList(async()=>{return arr});
             await finish(versionNumber);
           }).catch(function(erro){
             console.log(erro);
@@ -336,9 +362,9 @@ function App() {
           //reload(true);
           //return;
         }
-      }/*else{
+      }else{
         await finish();
-      }*/
+      }
     }
     world();
   }, [])
@@ -432,9 +458,10 @@ function App() {
         localStorage.setItem("trigger", trigger)
         localStorage.setItem("dbVersion", dbVersion)
         try{
-          setcontentStatus(()=>{return trigger})
+          //console.log(trigger)
+          //setcontentStatus(()=>{return trigger})
         }catch(e){
-          setcontentStatus(()=>{return false});
+          //UNCOMMENT setcontentStatus(()=>{return false});
         }
         setUsername(localStorage.getItem("user"));
         //console.log(res2);
@@ -742,379 +769,341 @@ function App() {
     else
       return hour*1440*60*1000 + (minute*60*1000)//this is the difference in milliseconds between show and current japan time
   }
-  function splitTime(time){
-    let hour = time.substring(0,2);
-    let minutes = time.substring(2, 4);
 
-    return [hour, minutes];
-  }
-  function broadcastToTime(broadcast){
-    let splitter = broadcast;
-    let hour = splitter.substring(0,2);
-    let minutes = splitter.substring(2, 4);
-
-    if(hour[0] == "0" & hour[1] != 0){
-      hour = hour[1];
-    }
-    else if(hour[0] == "0" & hour[1] == 0){
-      hour = 0;
-    }
-
-    if(minutes[0] == "0"){
-      minutes = minutes[1]
-    }
-    else{
-      minutes = minutes
-    }
-
-    return [Number(hour), Number(minutes), broadcast];
-  }
-
-  function daysFrom(currentDay, showsDay){
-    let showDayNum = null;
-    if(showsDay == "Sundays")
-      showDayNum = 0
-    else if(showsDay == "Mondays")
-      showDayNum = 1
-    else if(showsDay == "Tuesdays")
-      showDayNum = 2
-    else if(showsDay == "Wednesdays")
-      showDayNum = 3
-    else if(showsDay == "Thursdays")
-      showDayNum = 4    
-    else if(showsDay == "Fridays")
-      showDayNum = 5    
-    else if(showsDay == "Saturdays")
-      showDayNum = 6
-    
-    console.log("current day (est): ", currentDay);
-    console.log("show day (jst): ", showDayNum);
-    return showDayNum-currentDay;
-
-    /*let showsDate = null;
-    if(japanMonth.length > 1){
-      showsDate = new Date(Date.parse(`${japanYear}-${japanMonth+1}-${japanDOM}T${showHour}:${showMinutes}:00.000+09:00`))
+  function single_double(day, isMonth=false){
+    if(!isMonth){
+      if(day.toString().length == 1){
+        return "0" + day.toString()
+      }
     }else{
-      showsDate = new Date(Date.parse(`${japanYear}-0${japanMonth+1}-${japanDOM}T${showHour}:${showMinutes}:00.000+09:00`))
-    }*/
+      if(day.toString().length == 1){
+        return "0" + day.toString()
+      }
+    }
+    return day;
   }
 
-  function setTodayList(object, broadcast, time, japanese_time, days_month, japanNextDay){
+  function double_single(day){
+    if(day.toString().length > 1){
+      if(day.toString().substring(0,1) == '0'){
+        return day.toString().substring(1,2);
+      }else{
+        return day;
+      }
+    }return day;
+  }
+
+  function shorten_dayName(longname, regular=false){
+    let shorthand = "";
+
+    if(!regular){
+      if(longname == "Sundays"){
+        shorthand = "Sun";
+      }
+      if(longname == "Mondays"){
+        shorthand = "Mon";
+      }
+      if(longname == "Tuesdays"){
+        shorthand = "Tue";
+      }
+      if(longname == "Wednesdays"){
+        shorthand = "Wed";
+      }
+      if(longname == "Thursdays"){
+        shorthand = "Thu";
+      }
+      if(longname == "Fridays"){
+        shorthand = "Fri";
+      }
+      if(longname == "Saturdays"){
+        shorthand = "Sat";
+      }
+    }else{
+      if(longname == "Sunday"){
+        shorthand = "Sun";
+      }
+      if(longname == "Monday"){
+        shorthand = "Mon";
+      }
+      if(longname == "Tuesday"){
+        shorthand = "Tue";
+      }
+      if(longname == "Wednesday"){
+        shorthand = "Wed";
+      }
+      if(longname == "Thursday"){
+        shorthand = "Thu";
+      }
+      if(longname == "Friday"){
+        shorthand = "Fri";
+      }
+      if(longname == "Saturday"){
+        shorthand = "Sat";
+      }
+    }
+    return shorthand;
+  }
+
+  function organize_date(date_str, show_min_hr, show_day, jap_day, jap_object, broadcast, show_object, user_date){
+    //this is the user's current day date string.
+    let split_date = date_str.split(" ");
+    let day_short = split_date[0];
+    let year = split_date[3];
+    let month_short = split_date[1];
+    let day_of_month = split_date[2];
+
+    let user_time_ms = user_date.getTime();
+
+    let day_distance = 0; //this will go up based on date largness
+    
+    //this will be used to get difference between days.
+    let show_day_index = -1;
+    let jap_day_index = -1;
+
+    let days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    //console.log(show_day, jap_day)
+    for(let i = 0; i < days.length; i++){
+      if(days[i] == show_day){
+        show_day_index=i;
+      }if(days[i] == jap_day){
+        jap_day_index=i;
+      }
+    }
+
+    var japan = moment(jap_object)//.tz("Asia/Tokyo"); //day in tokyo, japan
+    var japan_clone = moment(japan);
+
+    let milliseconds_in_day = (86400*1000); //seconds in a day times 1000 milliesonds
+    
+    day_distance = jap_day_index - show_day_index;
+    //console.log(day_distance);
+    let amt_days_back_fwd = "0";
+
+    let raw_distance = 0;
+    
+    if(day_distance < 0){
+      //console.log(`${show_object.title} has yet to air this week`);
+      //amt_days_back_fwd = "+" + Number(day_distance).toString().substring(1,2);
+      raw_distance = Number(day_distance.toString().substring(1,2));
+      japan_clone.add(raw_distance, 'days').add(Number(double_single(show_min_hr.show_hr)), 'hours').add(Number(double_single(show_min_hr.show_min)), 'minutes');
+    }else if(day_distance == 0){
+      //console.log(`${show_object.title} airs today`);
+      japan_clone.add(Number(double_single(show_min_hr.show_hr)), 'hours').add(Number(double_single(show_min_hr.show_min)), 'minutes');
+    }else if(day_distance > 0){  
+      //amt_days_back_fwd = "-" + Number(day_distance).toString().substring(1,2);
+      //console.log(`${show_object.title} has already aired`);
+      raw_distance = day_distance;
+      japan_clone.subtract(raw_distance, 'days').add(show_min_hr.show_hr, 'hours').add(show_min_hr.show_min, 'minutes');
+    }
+
+    var date_to_userTime = new Date(Date.parse(`${japan_clone.year()}-${single_double(japan_clone.month()+1)}-${single_double(japan_clone.date())}T${single_double(japan_clone.hour())}:${single_double(japan_clone.minute())}:00.000+09:00`));
+    
+    let difference = 0;
+
+    show_day_index = -1;
+    jap_day_index = -1;
+
+    //console.log(show_day, jap_day)
+    for(let i = 0; i < 7; i++){
+      if(days[i] == date_to_userTime.getDay()){
+        show_day_index=i;
+      }if(days[i] == jap_day){
+        jap_day_index=i;
+      }
+    }
+
+    day_distance = user_date.getDay() - date_to_userTime.getDay();
+    difference = milliseconds_in_day * day_distance;
+
+    let last = null;
+    if(difference < 0){
+      last = moment(new Date(user_time_ms - difference));
+    }else if(difference > 0){
+      last = moment(new Date(user_time_ms - difference));
+    }else{
+      last = moment(new Date());
+    }
+    
+    last.set("hours", date_to_userTime.getHours()).set("minutes", date_to_userTime.getMinutes()).set("seconds", 0);
+    /*console.log(last)
+    console.log(date_to_userTime)
+    console.log(difference)
+    console.log(user_time_ms)
+    console.log(user_time_ms + difference)*/
+    //console.log(date_to_userTime, user_date)
+    //console.log(day_distance);
+    //console.log(date_to_userTime)
+    //console.log(date_to_userTime, `${japan_clone.year()}-${single_double(japan_clone.month()+1)}-${single_double(japan_clone.date())}T${single_double(japan_clone.hour())}:${single_double(japan_clone.minute())}:00.000+09:00`);
+    /*console.log(broadcast)
+    console.log(date_to_userTime)
+    console.log(date_to_userTime.getDate());
+    console.log(raw_distance)
+    console.log(day_distance)*/
+
+    return [date_to_userTime, last.toDate()];
+
+    /*let sign = amt_days_back_fwd.substring(0,1);
+    let diff = day_distance;
+
+    if(sign == "+"){
+      raw_distance = raw_distance * milliseconds_in_day;
+    }else if(sign == "-"){
+      raw_distance = raw_distance * milliseconds_in_day * -1;
+    }else{
+      raw_distance = milliseconds_in_day;
+    }
+    
+    var japan = moment().tz("Asia/Tokyo");
+    var japan_clone = moment(japan);
+    var day = new Date(japan.year(), japan.month()-1, japan.date());
+    var stuff = moment(day);
+    console.log(stuff)
+    console.log(`To Now: ${japan.toNow()}`);
+    console.log(`Formatted:  ${japan.format()}`);
+    console.log(`Japan UTC: ${japan.utc()}`);
+    console.log(`Japan Year: ${japan.year()}`);
+    console.log(`Japan Day: ${japan.day()}`);
+    console.log(`Japan Month: ${japan.month()}`);
+    console.log(` ${japan}`);
+
+    /*console.log(raw_distance);
+    console.log(milliseconds_in_day);
+    console.log(jap_object);
+
+    if(raw_distance < milliseconds_in_day){
+      jap_object.setTime(jap_object.getTime()+raw_distance)
+    }if(raw_distance > milliseconds_in_day){
+      jap_object.setTime(jap_object.getTime()-raw_distance)
+    }else{
+      
+    }*/
+    //console.log(jap_object);
+    //console.log(raw_distance);
+    //console.log(show_day_index, jap_day_index);
+  }
+
+  function setTodayList(object, broadcast, index, first_episode){
     //console.log(`Japan Standard Time: ${japanese_time.getHours()}:${japanese_time.getMinutes()}:${japanese_time.getSeconds()}`)
     //console.log(`Japanese Standard Day: ${japanese_time.getDate()}, Day of Week: ${japanese_time.getDay()}`)
-    let antiDupe = [];
-    const japanDOW = japanese_time.getDay();
-    const japanDOM = japanese_time.getDate();
-    const japanMonth = japanese_time.getMonth();
-    const japanYear = japanese_time.getFullYear();
+    //console.log()
+    if(broadcast != null && broadcast != '' && object.img_url != ''){
+      //time stuff
+      let timeSplit = broadcast.split(" at ");
+      let day = timeSplit[0];
+      let date_Hour = timeSplit[1].substring(0,2);
+      let date_Min = timeSplit[1].substring(2,4);
+      let shorten_day = shorten_dayName(day);
+      let short_date = "";
 
-    const DOW = time.getDay();
-    
-    const nextDay_DOW = japanNextDay.getDay();
-    const nextDay_DOM = japanNextDay.getDate();
-    const nextDay_Year = japanNextDay.getFullYear();
-    const nextDay_Month = japanNextDay.getMonth();
+      //date stuff
+      let dateSplit = first_episode.split(",");
+      let month_date = dateSplit[0].split(" ");
+      let month = month_date[0];
+      let first_day = month_date[1];
+      let year = dateSplit[1].trim();
 
-    //console.log(nextDay_DOM);
+      //get user's current day by localtime
+      let user_date = new Date();
 
-    let animeDay = null;
-
-    if(broadcast == null || broadcast == "" || broadcast == undefined){
-      return
-    }else{
-      animeDay = broadcast.split(" ");
-    }
-
-    //console.log(animeDay[2]);
-  
-    /*const year = time.getFullYear();
-
-    console.log("Epoch GMT Time Milliseconds: ", time.getTime())
-    console.log("Offset of Local to GMT (Minutes): " ,offsetFromGMT);
-    console.log("Year: ", year)
-    console.log("GMT Day(0 is sunday): ", DOW)
-
-    console.log("Hour", time.getHours())
-    console.log("Minute", time.getMinutes())
-    console.log("Second", time.getSeconds())*/
-    
-    //user local time settings
-    /*const localTime = new Date()
-    const localDay = localTime.getDate();
-    const localYear = localTime.getFullYear();
-
-    console.log("Local Hour", localTime.getHours())
-    console.log("Local Minute: ", localTime.getMinutes());
-    console.log("Local Second", localTime.getSeconds());*/
-    //const customTime = time.setUTCSeconds();
-    //console.log(time.getDa)
-  let DayWord = null;
-  let afterDayWord = null
-
-   if(DOW == 0){
-    DayWord = "Sundays"
-    afterDayWord = "Mondays"
-   }
-   else if(DOW == 1){
-    DayWord = "Mondays"
-    afterDayWord = "Tuesdays"
-   }
-   else if(DOW == 2){
-    DayWord = "Tuesdays"
-    afterDayWord = "Wednesdays"
-   }
-   else if(DOW == 3){
-    DayWord = "Wednesdays"
-    afterDayWord = "Thursdays"
-   }
-   else if(DOW == 4){
-    DayWord = "Thursdays"
-    afterDayWord = "Fridays"
-   }    
-   else if(DOW == 5){
-    DayWord = "Fridays" 
-    afterDayWord = "Saturday"
-   }   
-   else if(DOW == 6){
-    DayWord = "Saturdays"
-    afterDayWord = "Sundays"
-   }
-  
-  let jDayWord = null;
-  let beforejDayWord = null;
-  let afterjDayWord = null;
-
-  if(japanDOW == 0){
-    jDayWord = "Sundays";
-    beforejDayWord = "Saturdays";
-    afterjDayWord = "Mondays";
-  }
-  else if(japanDOW == 1){
-    jDayWord = "Mondays";
-    beforejDayWord = "Sundays";
-    afterjDayWord = "Tuesdays";
-  }
-  else if(japanDOW == 2){
-    jDayWord = "Tuesdays";
-    beforejDayWord = "Mondays";
-    afterjDayWord = "Wednesdays";
-  }
-  else if(japanDOW == 3){
-    jDayWord = "Wednesdays";
-    beforejDayWord = "Tuesdays";
-    afterjDayWord = "Thursdays";
-  }
-  else if(japanDOW == 4){
-    jDayWord = "Thursdays";
-    beforejDayWord = "Wednesdays";
-    afterjDayWord = "Fridays";
-  }    
-  else if(japanDOW == 5){
-    jDayWord = "Fridays";
-    beforejDayWord = "Thursdays";
-    afterjDayWord = "Saturdays";
-  }    
-  else if(japanDOW == 6){
-    jDayWord = "Saturdays";
-    beforejDayWord = "Fridays";
-    afterjDayWord = "Sundays";
-  }
-
-  if(animeDay[0] == afterjDayWord){
-    const broadcastStuff = animeDay[2].replace(":", "");
-    const showHour = splitTime(broadcastStuff)[0]
-    const showMinutes = splitTime(broadcastStuff)[1]
-
-    let showsDate = null;
-
-    if(nextDay_Month.length > 1){
-      if(japanDOM.toString().length > 1){
-        showsDate = new Date(Date.parse(`${nextDay_Year}-${nextDay_Month+1}-${japanDOM+1}T${showHour}:${showMinutes}:00.000+09:00`))
-      }else{
-        showsDate = new Date(Date.parse(`${nextDay_Year}-${nextDay_Month+1}-0${japanDOM+1}T${showHour}:${showMinutes}:00.000+09:00`))
-      }
-    }else{
-      if(japanDOM.toString().length > 1){
-        showsDate = new Date(Date.parse(`${nextDay_Year}-0${japanMonth+1}-${japanDOM+1}T${showHour}:${showMinutes}:00.000+09:00`))
-      }else{
-        showsDate = new Date(Date.parse(`${nextDay_Year}-0${japanMonth+1}-0${japanDOM+1}T${showHour}:${showMinutes}:00.000+09:00`))
-      }
-    }
-    
-    const showDOW_InEST = showsDate.getDay();
-    let estDayWord = null;
-    if(showDOW_InEST == 0)
-      estDayWord = "Sundays"
-    else if(showDOW_InEST == 1)
-      estDayWord = "Mondays"
-    else if(showDOW_InEST == 2)
-      estDayWord = "Tuesdays"
-    else if(showDOW_InEST == 3)
-      estDayWord = "Wednesdays"
-    else if(showDOW_InEST == 4)
-      estDayWord = "Thursdays"    
-    else if(showDOW_InEST == 5)
-      estDayWord = "Fridays"    
-    else if(showDOW_InEST == 6)
-      estDayWord = "Saturdays"
-
-    //console.log(`${object["title"]} airs: `, showsDate)
-    //console.log(object)
-    if(object["img_url"] == ""){
-      return;
-    }
-
-    if(estDayWord == DayWord){
-      //console.log("this ran")
-      //console.log(object.title)
-      //return;
-      setTodays((obj)=>{
-        return [...obj, object]
-      })
-    }
-  }
-  if(animeDay[0] == beforejDayWord){
-    const broadcastStuff = animeDay[2].replace(":", "");
-    const showHour = splitTime(broadcastStuff)[0]
-    const showMinutes = splitTime(broadcastStuff)[1]
-
-    let showsDate = null;
-    if(japanDOM > 1){
-      if(japanMonth.length > 1){
-        if(japanDOM.toString().length > 1){
-          showsDate = new Date(Date.parse(`${japanYear}-${japanMonth+1}-${japanDOM-1}T${showHour}:${showMinutes}:00.000+09:00`))
-        }else{
-          showsDate = new Date(Date.parse(`${japanYear}-${japanMonth+1}-0${japanDOM-1}T${showHour}:${showMinutes}:00.000+09:00`))
-        }
-      }else{
-        if(japanDOM.toString().length > 1){
-          showsDate = new Date(Date.parse(`${japanYear}-0${japanMonth+1}-${japanDOM-1}T${showHour}:${showMinutes}:00.000+09:00`))
-        }else{
-          showsDate = new Date(Date.parse(`${japanYear}-0${japanMonth+1}-0${japanDOM-1}T${showHour}:${showMinutes}:00.000+09:00`))
-        }
-      }
-    }else{
-      if(japanMonth.length > 1){
-        if(japanDOM.toString().length > 1){
-          showsDate = new Date(Date.parse(`${japanYear}-${japanMonth+1}-${japanDOM}T${showHour}:${showMinutes}:00.000+09:00`))
-        }else{
-          showsDate = new Date(Date.parse(`${japanYear}-${japanMonth+1}-0${japanDOM}T${showHour}:${showMinutes}:00.000+09:00`))
-        }
-      }else{
-        if(japanDOM.toString().length > 1){
-          showsDate = new Date(Date.parse(`${japanYear}-${japanMonth+1}-${japanDOM}T${showHour}:${showMinutes}:00.000+09:00`))
-        }else{
-          showsDate = new Date(Date.parse(`${japanYear}-0${japanMonth+1}-0${japanDOM}T${showHour}:${showMinutes}:00.000+09:00`))
-        }
-        
-      }
-    }
-    const showDOW_InEST = showsDate.getDay();
-    //console.log(`timeObj: ${showsDate}, Title: `, object.title);
-  
-    let estDayWord = null;
-    if(showDOW_InEST == 0)
-      estDayWord = "Sundays"
-    else if(showDOW_InEST == 1)
-      estDayWord = "Mondays"
-    else if(showDOW_InEST == 2)
-      estDayWord = "Tuesdays"
-    else if(showDOW_InEST == 3)
-      estDayWord = "Wednesdays"
-    else if(showDOW_InEST == 4)
-      estDayWord = "Thursdays"    
-    else if(showDOW_InEST == 5)
-      estDayWord = "Fridays"    
-    else if(showDOW_InEST == 6)
-      estDayWord = "Saturdays"
-
-    //console.log(`${object["title"]} airs: `, showsDate)
-    //console.log(object)
-    if(object["img_url"] == ""){
-      return;
-    }
-
-    if(estDayWord == DayWord){
-      setTodays((obj)=>{
-        //console.log(obj)
-        antiDupe.push(object);
-        return [...obj, object]
-      })
-    }
-  }
-
-  if(animeDay[0] == jDayWord){
-    const broadcastStuff = animeDay[2].replace(":", "");
-    const showHour = splitTime(broadcastStuff)[0]
-    const showMinutes = splitTime(broadcastStuff)[1]
-    //const showHour = broadcastToTime(broadcastStuff)[0]
-    //const showMinutes = broadcastToTime(broadcastStuff)[1]
-
-    let showsDate = null;
-    if(japanMonth.length > 1){
-      if(japanDOM.toString().length > 1){
-        showsDate = new Date(Date.parse(`${japanYear}-${japanMonth+1}-${japanDOM}T${showHour}:${showMinutes}:00.000+09:00`))
-      }else{
-        showsDate = new Date(Date.parse(`${japanYear}-${japanMonth+1}-0${japanDOM}T${showHour}:${showMinutes}:00.000+09:00`))
-      }
+      //get japanese day
+      let old_date = new Date();
       
-    }else{
-      if(japanDOM.toString().length > 1){
-        showsDate = new Date(Date.parse(`${japanYear}-0${japanMonth+1}-${japanDOM}T${showHour}:${showMinutes}:00.000+09:00`))
-      }else{
-        showsDate = new Date(Date.parse(`${japanYear}-0${japanMonth+1}-0${japanDOM}T${showHour}:${showMinutes}:00.000+09:00`))
+      let dateFormat = new Intl.DateTimeFormat("en-US",{
+        timeZone:"Asia/Tokyo",
+        hour:"numeric",
+        hour12:false,
+        minute:"numeric",
+        weekday:"long",
+        year:"numeric",
+        month:"2-digit",
+        day:"2-digit"
+      }).format(old_date);
+
+      let full_jap_date = dateFormat.split(",");
+      let longDayName = full_jap_date[0];
+      let short_japDayName = shorten_dayName(longDayName, true);
+
+      //date section
+      let date_only = full_jap_date[1].split("/");
+      let japMonth = date_only[0].trim();
+      let japYear = date_only[2];
+      let japDay = date_only[1];
+
+      //time section
+      let time_only = full_jap_date[2].split(":")
+      let japtime_hour = time_only[0];
+      let japtime_minute = time_only[1];
+
+      //get a day before and after for the anime as well
+      let jap_object = [date_only, japMonth, japYear, japtime_hour, japtime_minute]
+      let outter_obj = new Date(japYear, japMonth-1, japDay,0,0,0);
+      //console.log(outter_obj);
+      let final_match = organize_date(outter_obj.toDateString(), {show_hr:date_Hour, show_min:date_Min}, shorten_day, short_japDayName, outter_obj, broadcast, object, old_date);
+      let matcher = final_match[0];
+      
+      object["user_date"] = matcher;
+      object["time_difference"] = final_match[1];
+      //filter only for shows that come out in same day it is right now in japan
+      //console.log(matcher.getDay(), user_date.getDay())
+      if(matcher.getDay() == user_date.getDay()){
+        setTodays((obj)=>{
+          obj.push(object);
+          return obj;
+        })
+
+        setAnime((obj)=>{
+          obj.today.push(object);
+          return obj;
+        })
       }
-    }
 
-    const showDOW_InEST = showsDate.getDay();
-    //console.log(jDayWord);
-    //console.log(`timeObj: ${showsDate}, Title: `, object.title);
-    //if(showDOW_InEST > DOW){
-      //console.log(showsDate)
-      //console.log(`Title: ${object.title}, Japan Day to U.S.: ${showDOW_InEST}, Current Day to U.S.: `, DOW)
-    //}
-    //console.log(`Title: ${object.title}, Japan Day to U.S.: ${showDOW_InEST}, Current Day to U.S.: `, DOW)
-    //return;
-
-    //console.log(showDOW_InEST);
-    let estDayWord = null;
-    if(showDOW_InEST == 0)
-      estDayWord = "Sundays"
-    else if(showDOW_InEST == 1)
-      estDayWord = "Mondays"
-    else if(showDOW_InEST == 2)
-      estDayWord = "Tuesdays"
-    else if(showDOW_InEST == 3)
-      estDayWord = "Wednesdays"
-    else if(showDOW_InEST == 4)
-      estDayWord = "Thursdays"    
-    else if(showDOW_InEST == 5)
-      estDayWord = "Fridays"    
-    else if(showDOW_InEST == 6)
-      estDayWord = "Saturdays"
-
-    //console.log(`${object["title"]} airs: `, showsDate)
-    //console.log(object)
-    if(object["img_url"] == ""){
-      return;
-    }
-
-    if(estDayWord == DayWord){
-      setTodays((obj)=>{
-        antiDupe.push(object);
-        return [...obj, object]
-      })
-    }
-
-    let check = false;
-    for(let a = 0; a < antiDupe.length; a++){
-      for(let b = a; b < antiDupe.length; b++){
-        if(antiDupe[a]["title"] == antiDupe[b]["title"]){
-          check = true;
+      setAnime((obj)=>{
+        if(matcher.getDay() == 0){
+          obj.sunday.push(object);
+          return obj;
         }
-      }
+        else if(matcher.getDay() == 1){
+          obj.monday.push(object);
+          return obj;
+        }
+        else if(matcher.getDay() == 2){
+          obj.tuesday.push(object);
+          return obj;
+        }
+        else if(matcher.getDay() == 3){
+          obj.wednesday.push(object);
+          return obj;
+        }
+        else if(matcher.getDay() == 4){
+          obj.thursday.push(object);
+          return obj;
+        }
+        else if(matcher.getDay() == 5){
+          obj.friday.push(object);
+          return obj;
+        }
+        else if(matcher.getDay() == 6){
+          obj.saturday.push(object);
+          return obj;
+        }
+      })
+      
+      /*if(day.substring(0, day.length-1) == longDayName){
+        //console.log(object.title)
+        //console.log(`${japYear}-${single_double(japMonth)}-${single_double(japDay)}T${date_Hour}:${date_Min}:00`)
+        let inner_obj = new Date(`${japYear}-${single_double(japMonth)}-${single_double(japDay)}T${date_Hour}:${date_Min}:00.000Z`);
+        
+        if(old_date.getDay() == inner_obj.getDay()){
+          setTodays((obj)=>{
+            obj.push(object);
+            return obj;
+          })
+        }
+      }else{
+        let inner_obj = new Date(`${japYear}-${single_double(japMonth)}-${single_double(japDay)}T${date_Hour}:${date_Min}:00.000-09:00`);
+        //console.log(inner_obj)
+      }*/ 
     }
-  }
  }
 
 //<Header/>
@@ -1124,14 +1113,15 @@ function App() {
 //
   return (
     <div>
-      <ContextHead.Provider value={masterAllAnime}>
+      <ContextHead.Provider value={{"masterList":masterAllAnime, "db":db, "queueLoaded":isqueueLoaded, "setQueueLoaded":setQueueLoaded}}>
       <Router basename={process.env.PUBLIC_URL}>
         <Header loggedIn={isLoggedIn} setLoggedIn={setLoggedIn} username={username}/>
         <Nav showSearch={true} searchList={null} setRedirect={setRedirect} masterAllAnime={masterAllAnime} setMasterList={setMasterList}/>
         <Routes>
             <Route path="/redirect" element={<Redirecting/>}/>
-            <Route path="/queue" element={<Queue animeList={AnimeList} status={status} setInQueue={setInQueue} loggedIn={isLoggedIn} setloggedIn={setLoggedIn}/>}/>
+            <Route path="/queue" element={<Queue animeList={AnimeList} setInQueue={setInQueue}/>}/>
             <Route path="/anime" element={<Animedetail loggedIn={isLoggedIn} setloggedIn={setLoggedIn} addState={addState}/>}/>
+            <Route path="/user/:username/" element={<View url={window.location.href}/>} />
             <Route path="/" element={
               <>
                 <ErrorBoundary status={status} addState={addState} 
@@ -1140,7 +1130,7 @@ function App() {
                 <MainContent showContent={contentStatus} status={status} addState={addState} seasonAnime={seasonalAnime}
                 animeList={AnimeList} setSearch={setGetAnime} todayAnime={todaysList}
                 search={getAnime} handleSearch={handleSearch} topAnime={topAnime}
-                />
+                anime_by_day={anime_by_day}/>
                 </ErrorBoundary>
               </>
               }
