@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/static/css/main.e45876d4.css",
-    "main.js": "/static/js/main.3bc3abea.js",
+    "main.js": "/static/js/main.79fed38a.js",
     "static/media/WinterBreeze.gif": "/static/media/WinterBreeze.ce236a5cedbb2f03d22a.gif",
     "static/media/Banned_Words_2022_05_05.txt": "/static/media/Banned_Words_2022_05_05.a1a78272143213df4a7f.txt",
     "index.html": "/index.html",
     "main.e45876d4.css.map": "/static/css/main.e45876d4.css.map",
-    "main.3bc3abea.js.map": "/static/js/main.3bc3abea.js.map"
+    "main.79fed38a.js.map": "/static/js/main.79fed38a.js.map"
   },
   "entrypoints": [
     "static/css/main.e45876d4.css",
-    "static/js/main.3bc3abea.js"
+    "static/js/main.79fed38a.js"
   ]
 }
