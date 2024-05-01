@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/static/css/main.a838d2b1.css",
-    "main.js": "/static/js/main.9ff7ced3.js",
+    "main.js": "/static/js/main.e2746a3e.js",
     "static/media/spring.gif": "/static/media/spring.0008df7c89a507b47d57.gif",
-    "static/media/Banned_Words_2022_05_05.txt": "/static/media/Banned_Words_2022_05_05.502d3addacbd8198ea6e.txt",
+    "static/media/Banned_Words_2022_05_05.txt": "/static/media/Banned_Words_2022_05_05.7865125cfaac832702bd.txt",
     "index.html": "/index.html",
     "main.a838d2b1.css.map": "/static/css/main.a838d2b1.css.map",
-    "main.9ff7ced3.js.map": "/static/js/main.9ff7ced3.js.map"
+    "main.e2746a3e.js.map": "/static/js/main.e2746a3e.js.map"
   },
   "entrypoints": [
     "static/css/main.a838d2b1.css",
-    "static/js/main.9ff7ced3.js"
+    "static/js/main.e2746a3e.js"
   ]
 }
