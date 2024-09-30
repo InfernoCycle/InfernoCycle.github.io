@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/static/css/main.dcd6b8c4.css",
-    "main.js": "/static/js/main.5fc2bb47.js",
+    "main.css": "/static/css/main.71446b89.css",
+    "main.js": "/static/js/main.9fa218f7.js",
     "static/media/PumpkinHallow.png": "/static/media/PumpkinHallow.cfb011a4e3055626da05.png",
     "static/media/autumnLeaves.gif": "/static/media/autumnLeaves.8a9e8e633ccb16092bb1.gif",
     "static/media/Banned_Words_2022_05_05.txt": "/static/media/Banned_Words_2022_05_05.1315b591b58131944346.txt",
     "index.html": "/index.html",
-    "main.dcd6b8c4.css.map": "/static/css/main.dcd6b8c4.css.map",
-    "main.5fc2bb47.js.map": "/static/js/main.5fc2bb47.js.map"
+    "main.71446b89.css.map": "/static/css/main.71446b89.css.map",
+    "main.9fa218f7.js.map": "/static/js/main.9fa218f7.js.map"
   },
   "entrypoints": [
-    "static/css/main.dcd6b8c4.css",
-    "static/js/main.5fc2bb47.js"
+    "static/css/main.71446b89.css",
+    "static/js/main.9fa218f7.js"
   ]
 }
