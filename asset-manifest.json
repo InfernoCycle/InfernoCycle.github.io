@@ -1,14 +1,12 @@
 {
   "files": {
-    "main.css": "/static/css/main.83077aef.css",
-    "main.js": "/static/js/main.4a19a6ee.js",
-    "static/media/PumpkinHallow.png": "/static/media/PumpkinHallow.cfb011a4e3055626da05.png",
-    "static/media/autumnLeaves.gif": "/static/media/autumnLeaves.8a9e8e633ccb16092bb1.gif",
+    "main.css": "/static/css/main.fb3861d3.css",
+    "main.js": "/static/js/main.64ee1cb8.js",
     "static/media/Banned_Words_2022_05_05.txt": "/static/media/Banned_Words_2022_05_05.1315b591b58131944346.txt",
     "index.html": "/index.html"
   },
   "entrypoints": [
-    "static/css/main.83077aef.css",
-    "static/js/main.4a19a6ee.js"
+    "static/css/main.fb3861d3.css",
+    "static/js/main.64ee1cb8.js"
   ]
 }
