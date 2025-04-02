@@ -1,12 +1,12 @@
 {
   "files": {
-    "main.css": "/static/css/main.fb3861d3.css",
+    "main.css": "/static/css/main.8dc00baf.css",
     "main.js": "/static/js/main.c9bbede9.js",
     "static/media/Banned_Words_2022_05_05.txt": "/static/media/Banned_Words_2022_05_05.1315b591b58131944346.txt",
     "index.html": "/index.html"
   },
   "entrypoints": [
-    "static/css/main.fb3861d3.css",
+    "static/css/main.8dc00baf.css",
     "static/js/main.c9bbede9.js"
   ]
 }
